@@ -1,0 +1,870 @@
+/* --- 1. 基礎變數與全局設定 --- */
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #333;
+    
+    /* 情緒代表色 (基礎色相) */
+    --color-focus: #28a745; /* 專注：LeetCode 綠 */
+    --color-stable: #17a2b8; /* 穩定：平靜藍 */
+    --color-anxious: #fd7e14; /* 焦慮：橘色預警 */
+    --color-unmotivated: #6c757d; /* 沒動力：灰暗色 */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+/* --- 導覽列樣式 --- */
+#main-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 12px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background: #e2e6ea;
+}
+
+/* 被選中的導覽按鈕 */
+.nav-btn.active {
+    background: var(--color-stable); /* 使用我們設定的平靜藍 */
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* --- SPA 分頁顯示邏輯 --- */
+.page-section {
+    display: none; /* 預設全部隱藏 */
+    animation: fadeIn 0.3s ease-in-out; /* 切換時加上淡入特效 */
+}
+
+/* 只有帶有 active 類別的 section 才會顯示 */
+.page-section.active {
+    display: block; 
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 2. LeetCode 網格區塊樣式 --- */
+
+.grid-container {
+    display: grid;
+    /* 確保固定為 7 列 (代表週日到週六) */
+    grid-template-rows: repeat(7, 1fr);
+    /* 讓元素先由上往下排滿 7 格，再往右邊換行 */
+    grid-auto-flow: column;
+    /* 格子之間的緊密間距，LeetCode 經典比例 */
+    gap: 4px; 
+    /* 讓過長的網格可以左右滑動 */
+    overflow-x: auto;
+    padding: 20px 10px;
+    /* 隱藏捲軸，讓視覺更乾淨 (適用於 Firefox 與 Webkit) */
+    scrollbar-width: none; 
+}
+
+.grid-container::-webkit-scrollbar {
+    display: none;
+}
+
+.grid-cell {
+    /* LeetCode 經典的小正方形尺寸 */
+    width: 14px; 
+    height: 14px;
+    background-color: #ebedf0; /* 預設空網格的淺灰色 */
+    border-radius: 3px;        /* 微圓角 */
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* 當滑鼠懸浮在格子上的互動回饋 */
+.grid-cell:hover {
+    transform: scale(1.3);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+/* 針對有資料的格子加上微微的邊框，讓色彩更立體 */
+.grid-cell[data-has-data="true"] {
+    border: 1px solid rgba(27, 31, 35, 0.06);
+}
+
+/* 隱藏的 Loading 畫面樣式 */
+#loading-screen {
+    text-align: center;
+    color: var(--color-stable);
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+/* 抽卡動畫 */
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); }
+}
+.hidden { display: none; }
+
+/* --- 3. 心情日誌明信片樣式 (Pikmin Bloom 風格) --- */
+.postcard-container {
+    background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa;
+    border: 15px solid white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-radius: 2px;
+    padding: 20px;
+    position: relative;
+    min-height: 400px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+/* 郵戳樣式 (Stamp) */
+.postcard-stamp {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 90px;
+    height: 90px;
+    border: 3px solid #d9534f;
+    border-radius: 50%;
+    color: #d9534f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(15deg);
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+    opacity: 0.8;
+    z-index: 5;
+    background: rgba(255,255,255,0.4);
+}
+.postcard-stamp-date {
+    font-size: 0.9em;
+    margin-bottom: 2px;
+}
+.postcard-stamp-text {
+    font-size: 1.1em;
+    letter-spacing: 1px;
+}
+
+/* 迷因貼紙/角色立繪 */
+.postcard-meme {
+    position: absolute;
+    object-fit: contain;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+    transition: transform 0.3s;
+}
+
+.postcard-meme-1 {
+    bottom: 120px;
+    left: 10px;
+    width: 150px;
+    height: 150px;
+    z-index: 2;
+}
+
+.postcard-meme-2 {
+    bottom: 150px;
+    right: -10px;
+    width: 140px;
+    height: 140px;
+    z-index: 1;
+    transform: scaleX(-1);
+}
+
+/* 統計資料與 AI 結語區塊 */
+.postcard-content {
+    z-index: 10;
+    margin-top: auto;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--color-stable);
+    backdrop-filter: blur(2px);
+}
+
+.postcard-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #444;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 8px;
+}
+
+.postcard-ai-analysis h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1em;
+}
+
+.postcard-ai-analysis p {
+    margin: 0;
+    line-height: 1.4;
+    color: #555;
+    font-size: 0.9em;
+}
+
+/* ==========================================
+   待辦清單 (To-Do List) 樣式
+   ========================================== */
+.todo-container {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+.todo-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+#new-todo-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+}
+#todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.todo-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: #f8f9fa;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+.todo-item:hover {
+    background: #e9ecef;
+}
+.todo-item.completed {
+    opacity: 0.6;
+}
+.todo-item.completed span {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+.todo-checkbox {
+    margin-right: 10px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+.btn-delete-todo {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* ==========================================
+   圖鑑網格 (Gallery Grid)
+   ========================================== */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+}
+.gallery-item {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+    border: 3px solid #eee;
+}
+.gallery-item:hover {
+    transform: scale(1.05);
+    border-color: var(--color-stable);
+}
+.gallery-item img {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    display: block;
+    background: #fdfbfb;
+}
+.gallery-item-date {
+    text-align: center;
+    padding: 8px;
+    font-size: 0.85em;
+    font-weight: bold;
+    background: #f8f9fa;
+    color: #555;
+    border-top: 1px solid #eee;
+}
+
+/*  SPA 分頁顯示邏輯 */
+
+/* 1. 預設隱藏所有帶有 .page-section 類別的區塊 */
+.page-section {
+    display: none; 
+    animation: fadeIn 0.3s ease-in-out; /* 切換時加上微微淡入的過場特效 */
+}
+
+/* 2. 只有同時帶有 .active 類別的區塊，才會覆蓋上面的隱藏設定，顯示出來 */
+.page-section.active {
+    display: block; 
+}
+
+/* 淡入動畫的細節 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 懸浮小工具樣式 */
+
+/* 右下角懸浮按鈕 */
+#chat-widget-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--color-stable); /* 使用平靜藍 */
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+#chat-widget-btn:hover {
+    transform: scale(1.05);
+    background-color: #2b5797;
+}
+
+/* 聊天視窗本體 */
+#chat-widget-window {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* 隱藏視窗的類別 */
+.hidden-widget {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+}
+
+/* 視窗頂部標題列 */
+#chat-widget-header {
+    background-color: var(--color-stable);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chat-widget-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+#chat-widget-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* 對話顯示區 */
+#chat-container {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #fafafa;
+}
+
+/* 輸入區 */
+#chat-widget-input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background: white;
+}
+
+#user-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+}
+
+#send-btn {
+    background-color: var(--color-stable);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 0 15px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* ==========================================
+   迷因輪播廣告看板樣式
+   ========================================== */
+.meme-banner-container {
+    width: 100%;
+    height: 220px; /* 限制看板高度 */
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 25px; /* 與下方進度牆拉開距離 */
+    background-color: #2c3e50; /* 深色背景襯托梗圖 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#meme-banner-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* 確保梗圖比例不變形 */
+    transition: opacity 0.6s ease-in-out; /* 淡入淡出的動畫核心 */
+    opacity: 0; /* 預設透明，由 JS 控制顯示 */
+}
+
+.meme-banner-text {
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.95em;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: opacity 0.6s ease-in-out;
+    opacity: 0;
+}
+
+/* ==========================================
+   迷因輪播廣告看板 - 左右切換按鈕
+   ========================================== */
+.banner-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3); /* 半透明黑底 */
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2em;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 50%; /* 圓形按鈕 */
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.7); /* 滑過時變深 */
+}
+
+#banner-prev-btn {
+    left: 15px;
+}
+
+#banner-next-btn {
+    right: 15px;
+}
+
+/* 微調文字位置，避免與按鈕重疊 */
+.meme-banner-text {
+    position: absolute;
+    bottom: 15px;
+    /* 改為置中對齊 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.95em;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: opacity 0.4s ease-in-out;
+    opacity: 0;
+    white-space: nowrap; /* 確保文字不斷行 */
+}
+
+/* ==========================================
+   訪客迎賓彈出視窗 (Welcome Modal)
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px); /* 毛玻璃特效 */
+    display: none; /* 預設隱藏，由 JS 決定是否顯示 */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* 確保在畫面的最上層 */
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 400px;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: var(--color-stable);
+}
+
+#guest-name-input {
+    width: 80%;
+    padding: 10px 15px;
+    margin: 15px 0;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#guest-name-input:focus {
+    border-color: var(--color-stable);
+}
+
+#btn-start-journey {
+    background-color: var(--color-stable);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+#btn-start-journey:hover {
+    transform: scale(1.05);
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================
+   全螢幕過場預覽頁 (Splash Screen) 整合版
+   ========================================== */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #2c3e50, #4ca1af); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000; 
+    transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+}
+
+.splash-content {
+    text-align: center;
+    color: white;
+}
+
+.splash-content h1 {
+    font-size: 3.2em;
+    margin-bottom: 10px;
+    letter-spacing: 3px;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* 輸入框與按鈕的排版容器 */
+.splash-input-group {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 沉浸式半透明輸入框 */
+#splash-screen #guest-name-input {
+    width: 260px;
+    padding: 12px 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.14);
+    color: white;
+    font-size: 1.05em;
+    text-align: center;
+    outline: none;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+#splash-screen #guest-name-input::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+#splash-screen #guest-name-input:focus {
+    border-color: #fff;
+    background: rgba(255,255,255,0.25);
+    box-shadow: 0 0 12px rgba(255,255,255,0.4);
+}
+
+/* 白色典雅按鈕 */
+#splash-screen #btn-start-journey {
+    background-color: #ffffff;
+    color: #2c3e50;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+#splash-screen #btn-start-journey:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* 觸過場類別 */
+.splash-fade-out {
+    opacity: 0;
+    transform: scale(1.05);
+    pointer-events: none;
+}
+
+/* ==========================================
+   情緒打卡視窗樣式
+   ========================================== */
+.mood-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.mood-btn {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-weight: bold;
+    color: #495057;
+}
+
+.mood-btn:hover {
+    background: #e9ecef;
+}
+
+/* 被選取時的狀態 */
+.mood-btn.selected {
+    border-color: var(--color-stable);
+    background: #e3f2fd;
+    transform: scale(1.02);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* ==========================================
+   ✨ 1. 微互動：果凍彈跳按鈕 (Squish Effect)
+   ========================================== */
+/* 將這個 class 加到任何按鈕上，點擊時就會有果凍回彈感 */
+.btn-squish {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
+}
+.btn-squish:active {
+    transform: scale(0.92);
+}
+
+/* ==========================================
+   ✨ 2. 微互動：模組分頁的柔和過場 (Fade & Slide Up)
+   ========================================== */
+.page-section {
+    display: none; /* 預設隱藏 */
+}
+.page-section.active {
+    display: block;
+    animation: fadeUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================
+   ✨ 3. 微互動：情緒網格的呼吸發光 (Grid Hover Glow)
+   ========================================== */
+.grid-cell {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 3px; /* 讓方塊稍微圓潤一點點 */
+}
+.grid-cell[data-has-data="true"]:hover {
+    transform: scale(1.3);
+    z-index: 10;
+    position: relative;
+    /* 利用 CSS 變數讀取 JS 傳來的顏色來發光 */
+    box-shadow: 0 0 10px var(--cell-color, rgba(0,0,0,0.2));
+}
+
+/* ==========================================
+   📱 4. RWD 響應式設計 (Mobile First 介面調整)
+   ========================================== */
+@media (max-width: 768px) {
+    /* A. 將頂部導航列改為「底部標籤列 (Bottom Tab Bar)」 */
+    #main-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+        z-index: 1000;
+        padding: 10px 0;
+        margin: 0;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .nav-btn {
+        flex-direction: column;
+        font-size: 0.85em;
+        padding: 5px 10px;
+        background: transparent;
+        color: #666;
+        border: none;
+    }
+    
+    .nav-btn.active {
+        color: var(--color-stable);
+        font-weight: bold;
+        transform: scale(1.1);
+    }
+
+    /* 避免主內容被底部導航列遮擋 */
+    main {
+        padding-bottom: 80px; 
+    }
+
+    /* B. 心靈園丁對話框改為「抽屜式全螢幕 (Bottom Sheet)」 */
+    #chat-widget-window {
+        width: 100%;
+        height: 85vh;
+        bottom: 0;
+        right: 0;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #chat-widget-btn {
+        bottom: 80px; /* 移到導航列上方 */
+        right: 15px;
+    }
+
+    /* C. 縮小標題字級，避免手機版跑版 */
+    h1#system-logo {
+        font-size: 1.8em;
+    }
+    .splash-content h1 {
+        font-size: 2.2em;
+    }
+}
