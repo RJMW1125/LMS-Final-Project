@@ -81,9 +81,18 @@
             <h2>🎮 迷因修煉抽卡</h2>
             <div class="gacha-dashboard">
                 <p>目前代幣：<span id="token-count">15</span> 🪙</p>
-                <button id="btn-draw-card" class="btn-squish">抽取今日迷因</button>
+                <button id="btn-start-draw-session" class="btn-squish" style="background-color: var(--color-stable); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em;">消耗 1 幣開始發牌</button>
             </div>
-            <div id="card-reveal-area" class="hidden">
+
+            <div id="cards-spread-area" style="display: none; justify-content: center; gap: 20px; margin-top: 30px; perspective: 1000px; flex-wrap: wrap; min-height: 380px; align-items: center;">
+                <!-- JS 動態插入 -->
+            </div>
+            
+            <div id="card-reveal-area" class="hidden" style="display: flex; flex-direction: column; align-items: center;">
+            </div>
+
+            <div id="gacha-actions" style="display: none; text-align: center; margin-top: 20px;">
+                 <button id="btn-draw-again" class="btn-squish" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">再抽一次</button>
             </div>
         </section>
 
