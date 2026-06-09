@@ -184,20 +184,20 @@ section {
     letter-spacing: 1px;
 }
 
-/* 餈瑕�鞎潛�/閫坿𠧧蝡讠鼓 */
+/* 迷因圖片佔據明信片上方區域 */
 .postcard-meme {
-    position: absolute;
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+    max-height: 260px; /* 大約佔據 400px 的 2/3 */
     object-fit: contain;
     filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
     transition: transform 0.3s;
+    margin-top: 10px;
+    margin-bottom: 15px;
 }
 
 .postcard-meme-1 {
-    bottom: 120px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 200px;
     z-index: 2;
 }
 
