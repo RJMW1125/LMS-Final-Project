@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnConfirmJournal = document.getElementById('btn-confirm-journal');
     const btnCancelJournal = document.getElementById('btn-cancel-journal');
 
+    // Lightbox 元素
+    const galleryLightbox = document.getElementById('gallery-lightbox');
+    const btnCloseLightbox = document.getElementById('btn-close-lightbox');
+    const lightboxContent = document.getElementById('lightbox-content');
+
     const fallbackMemes = [
         'https://i.imgflip.com/2cp3na.jpg',
         'https://i.imgflip.com/9vct.jpg'
@@ -41,6 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const userJournal = journalInput.value.trim() || "今天是很棒的一天，繼續保持！";
             journalModal.style.display = 'none';
             generatePostcard(userJournal);
+        });
+    }
+
+    if (btnCloseLightbox && galleryLightbox) {
+        btnCloseLightbox.addEventListener('click', () => {
+            galleryLightbox.style.display = 'none';
+            lightboxContent.innerHTML = '';
+        });
+    }
+
+    // 點擊外部區域也能關閉 Lightbox
+    if (galleryLightbox) {
+        galleryLightbox.addEventListener('click', (e) => {
+            if (e.target === galleryLightbox) {
+                galleryLightbox.style.display = 'none';
+                lightboxContent.innerHTML = '';
+            }
         });
     }
 
@@ -161,9 +183,16 @@ document.addEventListener('DOMContentLoaded', () => {
         galleryData.forEach(item => {
             const cardItem = document.createElement('div');
             cardItem.className = 'gallery-item';
+            cardItem.style.cursor = 'pointer';
+            
+            // 點擊放大檢視
+            cardItem.addEventListener('click', () => {
+                openLightbox(item);
+            });
+
             // 將明信片縮小顯示
             cardItem.innerHTML = `
-                <div style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 2px; padding: 10px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; position: relative; overflow: hidden;">
+                <div style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 2px; padding: 10px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; position: relative; overflow: hidden; pointer-events: none;">
                     <div style="position: absolute; top: 5px; right: 5px; border: 2px solid #d9534f; border-radius: 50%; color: #d9534f; transform: rotate(15deg); font-size: 0.7em; padding: 2px; text-align: center; font-weight: bold; opacity: 0.8; background: rgba(255,255,255,0.4); z-index: 5;">
                         <div>${item.date.slice(5)}</div>
                         <div>✓${item.tasks}</div>
@@ -188,6 +217,34 @@ document.addEventListener('DOMContentLoaded', () => {
             img.className = 'gallery-item';
             galleryContainer.appendChild(img);
         });
+    }
+
+    function openLightbox(item) {
+        if (!galleryLightbox || !lightboxContent) return;
+        
+        lightboxContent.innerHTML = `
+            <div class="postcard-container" style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 15px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 2px; padding: 20px; position: relative; min-height: 400px; width: 320px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
+                <!-- 模擬旅行郵戳 -->
+                <div class="postcard-stamp" style="position: absolute; top: 20px; right: 20px; width: 90px; height: 90px; border: 3px solid #d9534f; border-radius: 50%; color: #d9534f; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(15deg); font-weight: bold; font-family: 'Courier New', Courier, monospace; opacity: 0.8; z-index: 5; background: rgba(255,255,255,0.4);">
+                    <span class="postcard-stamp-date" style="font-size: 0.9em; margin-bottom: 2px;">${item.date}</span>
+                    <span class="postcard-stamp-text" style="font-size: 1.1em; letter-spacing: 1px;">✓ ${item.tasks}</span>
+                </div>
+                
+                <!-- 迷因圖片佔據明信片上方區域 -->
+                <img src="${item.pikminUrl}" crossorigin="anonymous" class="postcard-meme postcard-meme-1" style="position: relative; width: 100%; flex-grow: 1; max-height: 260px; object-fit: contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); margin-top: 10px; margin-bottom: 15px; z-index: 2;">
+
+                <!-- 統計資料與日誌結語 -->
+                <div class="postcard-content" style="z-index: 10; margin-top: auto; background: rgba(255, 255, 255, 0.85); padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-around; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; color: #444;">
+                        <span>🔥 專注: ${item.focus}天</span>
+                        <span>💦 焦慮: ${item.anxious}天</span>
+                    </div>
+                    <h4 style="margin: 0 0 5px 0; color: #2c3e50; display: flex; align-items: center; gap: 5px;">✍️ 今日日誌：</h4>
+                    <p style="color: #555; font-size: 0.95em; line-height: 1.5; margin: 0;">${item.journal}</p>
+                </div>
+            </div>
+        `;
+        galleryLightbox.style.display = 'flex';
     }
 
     loadGallery();

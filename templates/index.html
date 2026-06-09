@@ -190,6 +190,16 @@
         </div>
     </div>
 
+    <!-- 圖鑑放大檢視 Modal -->
+    <div id="gallery-lightbox" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2000;">
+        <div style="position: relative;">
+            <button id="btn-close-lightbox" style="position: absolute; top: -15px; right: -15px; background: #d9534f; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; z-index: 2010; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">X</button>
+            <div id="lightbox-content">
+                <!-- 這裡將動態插入放大的明信片 HTML 或圖片 -->
+            </div>
+        </div>
+    </div>
+
     <script src="../static/js/main.js"></script>
     <script src="../static/js/grid.js"></script>
     <script src="../static/js/gacha.js"></script>
