@@ -11,8 +11,8 @@ window.initGachaEvents = function() {
     let tokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
     if (tokenDisplay) tokenDisplay.innerText = tokens;
 
-    // 每日抽卡次數限制邏輯
-    const MAX_DAILY_DRAWS = 3;
+    // 每日抽卡次數限制邏輯 (測試中，暫時改為 999)
+    const MAX_DAILY_DRAWS = 999;
     const todayStr = new Date().toISOString().split('T')[0];
     let lastDrawDate = localStorage.getItem('lms_last_draw_date') || '';
     let dailyDraws = parseInt(localStorage.getItem('lms_daily_draws')) || 0;

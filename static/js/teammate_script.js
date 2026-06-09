@@ -848,7 +848,7 @@ function renderMemeModule() {
       <section id="module-gacha" class="page-section active" style="padding: 0;">
           <h2 style="margin-bottom: 20px;">🎮 迷因修煉抽卡</h2>
           <div class="gacha-dashboard" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center;">
-              <p style="font-size: 1.2em; font-weight: bold;">目前代幣：<span id="token-count" style="color: var(--color-stable); font-size: 1.3em;">15</span> 🪙 &nbsp;&nbsp;|&nbsp;&nbsp; 今日抽卡：<span id="daily-draw-count">0</span> / 3 次</p>
+              <p style="font-size: 1.2em; font-weight: bold;">目前代幣：<span id="token-count" style="color: var(--color-stable); font-size: 1.3em;">15</span> 🪙 &nbsp;&nbsp;|&nbsp;&nbsp; 今日抽卡：<span id="daily-draw-count">0</span> / ∞ 次 (測試中)</p>
               <div style="margin: 15px 0;">
                   <input type="text" id="gacha-mood-input" placeholder="說說你現在的心情或關鍵字..." autocomplete="off" style="padding: 12px; width: 300px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;">
               </div>

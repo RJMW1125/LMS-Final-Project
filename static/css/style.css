@@ -4,19 +4,15 @@
     --text-color: #333;
     
     /* ���隞�”�� (�箇��脩㮾) */
-    --color-focus: #28a745; /* 撠�釣嚗匁eetCode 蝬� */
-    --color-stable: #17a2b8; /* 蝛拙�嚗𡁜像�𡏭� */
-    --color-anxious: #fd7e14; /* �行�嚗𡁏��脤�霅� */
-    --color-unmotivated: #6c757d; /* 瘝鍦��𨥈��唳��� */
+    /* 隞” (箇脩㮾) */
+    --color-focus: #28a745; /* 撠釣嚗匁eetCode 蝬 */
+    --color-stable: #17a2b8; /* 蝛拙嚗𡁜像𡏭 */
+    --color-anxious: #fd7e14; /* 行嚗𡁏脤霅 */
+    --color-unmotivated: #6c757d; /* 瘝鍦𨥈唳 */
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+    /* Styles are now mainly handled by teammate_style.css */
 }
 
 section {
