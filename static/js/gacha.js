@@ -6,9 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionsArea = document.getElementById('gacha-actions');
     const btnDrawAgain = document.getElementById('btn-draw-again');
     const moodInput = document.getElementById('gacha-mood-input');
+    const dailyDrawDisplay = document.getElementById('daily-draw-count');
 
     let tokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
     if (tokenDisplay) tokenDisplay.innerText = tokens;
+
+    // 每日抽卡次數限制邏輯
+    const MAX_DAILY_DRAWS = 3;
+    const todayStr = new Date().toISOString().split('T')[0];
+    let lastDrawDate = localStorage.getItem('lms_last_draw_date') || '';
+    let dailyDraws = parseInt(localStorage.getItem('lms_daily_draws')) || 0;
+
+    if (lastDrawDate !== todayStr) {
+        dailyDraws = 0;
+        localStorage.setItem('lms_last_draw_date', todayStr);
+        localStorage.setItem('lms_daily_draws', dailyDraws);
+    }
+    if (dailyDrawDisplay) dailyDrawDisplay.innerText = dailyDraws;
 
     // 一次性決定 3 張卡的資料
     async function generateCardsData(userMood) {
@@ -41,6 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnStartDraw.addEventListener('click', async () => {
+        if (dailyDraws >= MAX_DAILY_DRAWS) {
+            alert('⚠️ 今日已達抽取上限 (3/3)！\n請去首頁完成學習任務，累積更多代幣為明天做準備吧！');
+            return;
+        }
+
         if (tokens <= 0) {
             alert('代幣不足啦！請先去完成今日任務！');
             return;
@@ -49,8 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const userMood = moodInput ? moodInput.value.trim() : "";
 
         tokens -= 1;
+        dailyDraws += 1;
         localStorage.setItem('lms_tokens', tokens);
+        localStorage.setItem('lms_daily_draws', dailyDraws);
+        
         tokenDisplay.innerText = tokens;
+        if (dailyDrawDisplay) dailyDrawDisplay.innerText = dailyDraws;
         
         btnStartDraw.style.display = 'none';
         if (moodInput) moodInput.style.display = 'none';
