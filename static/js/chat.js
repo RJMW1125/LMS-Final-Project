@@ -61,14 +61,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("API Key 未設定");
             }
 
-            const formattedHistory = chatHistory.map(msg => ({
-                role: msg.role === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.content }]
-            }));
+            // 為了避免因之前的錯誤導致 localStorage 中存在連續的同角色發言，我們必須確保角色交替
+            const sanitizedHistory = [];
+            for (const msg of chatHistory) {
+                const role = msg.role === 'user' ? 'user' : 'model';
+                if (sanitizedHistory.length === 0 || sanitizedHistory[sanitizedHistory.length - 1].role !== role) {
+                    sanitizedHistory.push({ role: role, parts: [{ text: msg.content }] });
+                } else {
+                    // 若與前一則同角色，則合併內容
+                    sanitizedHistory[sanitizedHistory.length - 1].parts[0].text += "\n" + msg.content;
+                }
+            }
 
-            // 在歷史記錄最前面加入系統提示詞 (System Prompt) 讓 AI 扮演心靈園丁
-            if (formattedHistory.length > 0 && formattedHistory[0].role === 'user') {
-                 formattedHistory[0].parts[0].text = "你是 MoodStudy 的 AI 心靈園丁。你的任務是溫暖、同理地傾聽學生的心聲，給予心理支持與學習建議。\n使用者說：" + formattedHistory[0].parts[0].text;
+            // 若開頭不是 user，Gemini API 會報錯，需補上
+            if (sanitizedHistory.length > 0 && sanitizedHistory[0].role !== 'user') {
+                sanitizedHistory.unshift({ role: 'user', parts: [{ text: '嗨' }] });
             }
 
             const response = await fetch(
@@ -76,7 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: formattedHistory })
+                    body: JSON.stringify({ 
+                        system_instruction: { parts: [{ text: "你是 MoodStudy 的 AI 心靈園丁。你的任務是溫暖、同理地傾聽學生的心聲，給予心理支持與學習建議。" }] },
+                        contents: sanitizedHistory 
+                    })
                 }
             );
             
@@ -90,11 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 localStorage.setItem('lms_chat_history', JSON.stringify(chatHistory));
             } else {
-                appendMessage('系統', 'API 回傳發生錯誤');
+                console.error("Gemini API error:", data);
+                appendMessage('系統', 'API 回傳發生錯誤: ' + (data.error ? data.error.message : '未知錯誤'));
             }
             
         } catch (error) {
             document.getElementById(loadingId).remove();
+            console.error("Fetch error:", error);
             appendMessage('系統', '無法連接到 AI 服務，請確認網路與 API 狀態。');
         }
     });
