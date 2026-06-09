@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+window.initGachaEvents = function() {
     const btnStartDraw = document.getElementById('btn-start-draw-session');
     const tokenDisplay = document.getElementById('token-count');
     const spreadArea = document.getElementById('cards-spread-area');
@@ -245,4 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
             moodInput.value = '';
         }
     });
-});
+
+    updateUI();
+};

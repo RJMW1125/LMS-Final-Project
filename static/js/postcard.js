@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+window.initPostcardEvents = function() {
     const btnGenerate = document.getElementById('btn-generate-postcard');
     const loadingScreen = document.getElementById('loading-screen');
     const previewArea = document.getElementById('postcard-preview-area');
@@ -248,4 +248,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadGallery();
-});
+};
