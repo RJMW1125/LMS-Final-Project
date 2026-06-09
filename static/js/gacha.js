@@ -244,7 +244,4 @@ window.initGachaEvents = function() {
             moodInput.style.display = 'inline-block';
             moodInput.value = '';
         }
-    });
-
-    updateUI();
 };
