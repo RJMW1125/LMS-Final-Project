@@ -3,202 +3,192 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingScreen = document.getElementById('loading-screen');
     const previewArea = document.getElementById('postcard-preview-area');
     const canvas = document.getElementById('postcard-canvas');
-    const btnSaveGallery = document.getElementById('btn-save-gallery');
-    
-    // Gallery DOM
+    const btnSave = document.getElementById('btn-save-gallery');
+    const btnDownload = document.getElementById('btn-download');
+    const btnShare = document.getElementById('btn-share');
     const galleryContainer = document.getElementById('gallery-container');
 
-    // 預設 fallback 迷因 (若使用者還沒抽過卡)
+    // 日誌 Modal 元素
+    const journalModal = document.getElementById('journal-modal');
+    const journalInput = document.getElementById('journal-input');
+    const btnConfirmJournal = document.getElementById('btn-confirm-journal');
+    const btnCancelJournal = document.getElementById('btn-cancel-journal');
+
     const fallbackMemes = [
-        'https://i.imgflip.com/1iruch.jpg', 
-        'https://i.imgflip.com/2cp3na.jpg'
+        'https://i.imgflip.com/2cp3na.jpg',
+        'https://i.imgflip.com/9vct.jpg'
     ];
 
-    let currentPostcardDataUrl = null;
+    let currentPostcardData = null;
 
-    btnGenerate.addEventListener('click', async () => {
-        // 1. 顯示 Loading
-        previewArea.style.display = 'none';
-        canvas.innerHTML = '';
-        loadingScreen.style.display = 'block';
-        btnGenerate.disabled = true;
-
-        await new Promise(resolve => setTimeout(resolve, 1500)); // 假裝 AI 在畫圖
-
-        // 2. 獲取本週使用者紀錄 (計算專注、焦慮與任務數)
-        let userRecords = JSON.parse(localStorage.getItem('lms_user_records')) || [];
-        let totalTasks = 0;
-        let focusDays = 0;
-        let anxiousDays = 0;
-        
-        // 簡單統計最近 7 天的資料
-        const recentRecords = userRecords.slice(-7);
-        recentRecords.forEach(r => {
-            totalTasks += r.tasksCompleted || 0;
-            if (r.primaryMood === 'focus') focusDays++;
-            if (r.primaryMood === 'anxious') anxiousDays++;
+    // 1. 點擊產生日誌明信片 -> 打開 Modal
+    if (btnGenerate && journalModal) {
+        btnGenerate.addEventListener('click', () => {
+            journalInput.value = '';
+            journalModal.style.display = 'flex';
         });
-
-        // 3. 獲取最近抽到的迷因圖 (作為皮克敏)
-        let memeGallery = JSON.parse(localStorage.getItem('lms_meme_gallery')) || [];
-        let pikmin1 = fallbackMemes[0];
-        
-        if (memeGallery.length >= 1) {
-            // 取最新的一張
-            pikmin1 = memeGallery[memeGallery.length - 1].url;
-        }
-
-        const todayDate = new Date().toISOString().split('T')[0];
-        let weeklySummary = `本週你完成了 ${totalTasks} 項任務！其中有 ${focusDays} 天專注力爆棚。繼續保持！`;
-        if (anxiousDays > focusDays) {
-            weeklySummary = `本週有 ${anxiousDays} 天感到焦慮，但你依然撐過來了，共完成了 ${totalTasks} 項任務。辛苦了！`;
-        }
-
-        // 4. 繪製明信片 (Pikmin Bloom 風格)
-        canvas.innerHTML = `
-            <div id="postcard-element" class="postcard-container">
-                <!-- 模擬旅行郵戳 -->
-                <div class="postcard-stamp">
-                    <span class="postcard-stamp-date">${todayDate}</span>
-                    <span class="postcard-stamp-text">✓ ${totalTasks}</span>
-                </div>
-                
-                <!-- 像皮克敏一樣在畫面上點綴的迷因圖 -->
-                <img src="${pikmin1}" crossorigin="anonymous" class="postcard-meme postcard-meme-1">
-
-                <!-- 統計資料與 AI 結語 -->
-                <div class="postcard-content">
-                    <div class="postcard-stats">
-                        <span>🔥 專注: ${focusDays}天</span>
-                        <span>💦 焦慮: ${anxiousDays}天</span>
-                    </div>
-                    <div class="postcard-ai-analysis">
-                        <h4>🤖 園丁結語：</h4>
-                        <p>${weeklySummary}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        loadingScreen.style.display = 'none';
-        previewArea.style.display = 'flex';
-        btnGenerate.disabled = false;
-
-        // 5. 將明信片預先轉成 Canvas / DataURL 方便下載與收藏
-        setTimeout(() => {
-            html2canvas(document.getElementById('postcard-element'), {
-                scale: 2, 
-                backgroundColor: null,
-                useCORS: true,
-                allowTaint: true
-            }).then(renderedCanvas => {
-                currentPostcardDataUrl = renderedCanvas.toDataURL('image/jpeg', 0.8);
-            }).catch(err => {
-                console.error("明信片截圖失敗：", err);
-            });
-        }, 500); // 稍微等待圖片載入
-    });
-
-    // --- 下載功能邏輯 ---
-    const btnDownload = document.getElementById('btn-download');
-    if (btnDownload) {
-        btnDownload.onclick = () => {
-            if (!currentPostcardDataUrl) return alert('圖片仍在產生中，請稍後再試！');
-            const link = document.createElement('a');
-            link.download = 'MemeLogic_心情明信片.jpg';
-            link.href = currentPostcardDataUrl;
-            link.click();
-        };
     }
 
-    // --- 收藏至圖鑑功能邏輯 ---
-    if (btnSaveGallery) {
-        btnSaveGallery.onclick = () => {
-            if (!currentPostcardDataUrl) return alert('圖片仍在產生中，請稍後再試！');
+    if (btnCancelJournal && journalModal) {
+        btnCancelJournal.addEventListener('click', () => {
+            journalModal.style.display = 'none';
+        });
+    }
+
+    // 2. 確定生成明信片
+    if (btnConfirmJournal && journalModal) {
+        btnConfirmJournal.addEventListener('click', () => {
+            const userJournal = journalInput.value.trim() || "今天是很棒的一天，繼續保持！";
+            journalModal.style.display = 'none';
+            generatePostcard(userJournal);
+        });
+    }
+
+    function generatePostcard(userJournal) {
+        btnGenerate.style.display = 'none';
+        loadingScreen.style.display = 'block';
+        previewArea.style.display = 'none';
+
+        // 模擬打包時間
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            previewArea.style.display = 'flex';
+
+            // 獲取數據
+            const totalTasks = (JSON.parse(localStorage.getItem('lms_todos')) || []).filter(t => t.completed).length;
+            const records = JSON.parse(localStorage.getItem('lms_user_records')) || [];
+            const focusDays = records.filter(r => r.mood === 'focus').length;
+            const anxiousDays = records.filter(r => r.mood === 'anxious').length;
+
+            // 獲取最近抽到的迷因圖 (作為皮克敏)
+            let memeGallery = JSON.parse(localStorage.getItem('lms_meme_gallery')) || [];
+            let pikmin1 = fallbackMemes[0];
             
-            let postcardGallery = JSON.parse(localStorage.getItem('lms_postcard_gallery')) || [];
-            
-            // 避免重複收藏同一天的
-            const todayDate = new Date().toISOString().split('T')[0];
-            const alreadyExists = postcardGallery.some(p => p.date === todayDate);
-            
-            if (alreadyExists) {
-                if(!confirm('今天已經收藏過明信片了，確定要覆蓋嗎？')) return;
-                postcardGallery = postcardGallery.filter(p => p.date !== todayDate);
+            if (memeGallery.length >= 1) {
+                pikmin1 = memeGallery[memeGallery.length - 1].url;
             }
 
-            postcardGallery.push({
+            const todayDate = new Date().toISOString().split('T')[0];
+
+            // 準備暫存資料以供存入圖鑑
+            currentPostcardData = {
                 id: 'pc_' + Date.now(),
                 date: todayDate,
-                image: currentPostcardDataUrl
-            });
-            
-            localStorage.setItem('lms_postcard_gallery', JSON.stringify(postcardGallery));
-            alert('⭐ 成功收藏至我的旅行圖鑑！');
-            renderGallery();
-        };
+                tasks: totalTasks,
+                focus: focusDays,
+                anxious: anxiousDays,
+                pikminUrl: pikmin1,
+                journal: userJournal
+            };
+
+            // 繪製明信片 HTML
+            canvas.innerHTML = `
+                <div id="postcard-element" class="postcard-container" style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 15px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 2px; padding: 20px; position: relative; min-height: 400px; width: 320px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
+                    
+                    <!-- 模擬旅行郵戳 -->
+                    <div class="postcard-stamp" style="position: absolute; top: 20px; right: 20px; width: 90px; height: 90px; border: 3px solid #d9534f; border-radius: 50%; color: #d9534f; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(15deg); font-weight: bold; font-family: 'Courier New', Courier, monospace; opacity: 0.8; z-index: 5; background: rgba(255,255,255,0.4);">
+                        <span class="postcard-stamp-date" style="font-size: 0.9em; margin-bottom: 2px;">${todayDate}</span>
+                        <span class="postcard-stamp-text" style="font-size: 1.1em; letter-spacing: 1px;">✓ ${totalTasks}</span>
+                    </div>
+                    
+                    <!-- 迷因圖片佔據明信片上方區域 -->
+                    <img src="${pikmin1}" crossorigin="anonymous" class="postcard-meme postcard-meme-1" style="position: relative; width: 100%; flex-grow: 1; max-height: 260px; object-fit: contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); margin-top: 10px; margin-bottom: 15px; z-index: 2;">
+
+                    <!-- 統計資料與日誌結語 -->
+                    <div class="postcard-content" style="z-index: 10; margin-top: auto; background: rgba(255, 255, 255, 0.85); padding: 15px; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-around; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; color: #444;">
+                            <span>🔥 專注: ${focusDays}天</span>
+                            <span>💦 焦慮: ${anxiousDays}天</span>
+                        </div>
+                        <h4 style="margin: 0 0 5px 0; color: #2c3e50; display: flex; align-items: center; gap: 5px;">✍️ 今日日誌：</h4>
+                        <p style="color: #555; font-size: 0.95em; line-height: 1.5; margin: 0;">${userJournal}</p>
+                    </div>
+                </div>
+            `;
+        }, 1000);
     }
 
-    // --- 渲染圖鑑邏輯 ---
-    function renderGallery() {
+    // 收藏至圖鑑 (存原始資料，保持 GIF 動態)
+    if (btnSave) {
+        btnSave.addEventListener('click', () => {
+            if (!currentPostcardData) return;
+            let gallery = JSON.parse(localStorage.getItem('lms_postcard_gallery_data')) || [];
+            gallery.push(currentPostcardData);
+            localStorage.setItem('lms_postcard_gallery_data', JSON.stringify(gallery));
+            
+            alert('⭐ 成功收藏至您的旅行圖鑑！');
+            loadGallery();
+        });
+    }
+
+    // 下載依然使用 html2canvas 截圖
+    if (btnDownload) {
+        btnDownload.addEventListener('click', () => {
+            const el = document.getElementById('postcard-element');
+            if(!el) return;
+            html2canvas(el, { useCORS: true, allowTaint: false }).then(canvasElement => {
+                const link = document.createElement('a');
+                link.download = `MemeLogic_Postcard_${Date.now()}.png`;
+                link.href = canvasElement.toDataURL('image/png');
+                link.click();
+            });
+        });
+    }
+
+    if (btnShare) {
+        btnShare.addEventListener('click', () => {
+            alert('🌐 分享功能即將推出！你可以先下載圖片發到 IG 喔！');
+        });
+    }
+
+    // 動態載入圖鑑
+    function loadGallery() {
         if (!galleryContainer) return;
         
-        let postcardGallery = JSON.parse(localStorage.getItem('lms_postcard_gallery')) || [];
-        galleryContainer.innerHTML = '';
+        let galleryData = JSON.parse(localStorage.getItem('lms_postcard_gallery_data')) || [];
         
-        if (postcardGallery.length === 0) {
-            galleryContainer.innerHTML = '<p style="color: #999;">目前還沒有收藏任何明信片喔！</p>';
+        // 為了相容以前存的 Base64 舊資料，合併顯示
+        let oldGallery = JSON.parse(localStorage.getItem('lms_postcard_gallery')) || [];
+
+        galleryContainer.innerHTML = '';
+
+        if (galleryData.length === 0 && oldGallery.length === 0) {
+            galleryContainer.innerHTML = '<p style="color: #999; grid-column: 1 / -1; text-align: center;">尚未收藏任何明信片，趕快去產生一張吧！</p>';
             return;
         }
 
-        postcardGallery.reverse().forEach(pc => {
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `
-                <img src="${pc.image}" alt="Postcard on ${pc.date}">
-                <div class="gallery-item-date">${pc.date}</div>
+        // 渲染新版動態 JSON 資料
+        galleryData.forEach(item => {
+            const cardItem = document.createElement('div');
+            cardItem.className = 'gallery-item';
+            // 將明信片縮小顯示
+            cardItem.innerHTML = `
+                <div style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 2px; padding: 10px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: 5px; right: 5px; border: 2px solid #d9534f; border-radius: 50%; color: #d9534f; transform: rotate(15deg); font-size: 0.7em; padding: 2px; text-align: center; font-weight: bold; opacity: 0.8; background: rgba(255,255,255,0.4); z-index: 5;">
+                        <div>${item.date.slice(5)}</div>
+                        <div>✓${item.tasks}</div>
+                    </div>
+                    <img src="${item.pikminUrl}" crossorigin="anonymous" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; z-index: 2; position: relative;">
+                    <div style="background: rgba(255,255,255,0.9); padding: 5px; border-radius: 4px; font-size: 0.8em; flex-grow: 1; z-index: 10;">
+                        <div style="display:flex; justify-content: space-around; border-bottom: 1px dashed #ccc; padding-bottom: 5px; margin-bottom: 5px; font-weight: bold;">
+                            <span>🔥 ${item.focus}</span>
+                            <span>💦 ${item.anxious}</span>
+                        </div>
+                        <p style="margin: 0; color: #555; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">${item.journal}</p>
+                    </div>
+                </div>
             `;
-            
-            // 點擊放大預覽 (簡單實作，另開視窗或放入 modal)
-            item.onclick = () => {
-                const w = window.open();
-                w.document.write(`<img src="${pc.image}" style="max-width:100%; display:block; margin:auto;">`);
-            };
-            
-            galleryContainer.appendChild(item);
+            galleryContainer.appendChild(cardItem);
+        });
+
+        // 渲染舊版 Base64 靜態資料
+        oldGallery.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'gallery-item';
+            galleryContainer.appendChild(img);
         });
     }
 
-    // 初始化時渲染圖鑑
-    renderGallery();
-    
-    // ==========================================
-    // 社群分享邏輯
-    // ==========================================
-    const btnShare = document.getElementById('btn-share');
-    if (btnShare) {
-        btnShare.onclick = async () => {
-            const currentUrl = window.location.href;
-            const isLocalhost = currentUrl.includes('127.0.0.1') || currentUrl.includes('localhost') || currentUrl.includes('file://');
-            const displayUrl = isLocalhost ? 'https://memelogic-demo.app/my-postcard' : currentUrl;
-
-            const shareData = {
-                title: 'MemeLogic 專屬心情明信片',
-                text: `我在 MemeLogic 收集到了新的旅行明信片！來看看我跟迷因們的冒險成果吧！🚀`,
-                url: displayUrl
-            };
-
-            try {
-                if (navigator.share) {
-                    await navigator.share(shareData);
-                } else {
-                    const textToCopy = `${shareData.text}\n連結: ${shareData.url}`;
-                    await navigator.clipboard.writeText(textToCopy);
-                    alert('已將專屬分享文案與連結複製到剪貼簿！');
-                }
-            } catch (err) {
-                console.log('分享取消或發生異常狀態：', err);
-            }
-        };
-    }
+    loadGallery();
 });
