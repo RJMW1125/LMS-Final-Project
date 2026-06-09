@@ -146,6 +146,22 @@ function saveRegisteredAccounts(accounts) {
   localStorage.setItem("moodstudy_registered_accounts", JSON.stringify(accounts));
 }
 
+function initializeDemoClass() {
+  const registered = getRegisteredAccounts();
+  let added = false;
+  for (let i = 1; i <= 30; i++) {
+    const uname = `student${i}`;
+    if (!registered[uname]) {
+      registered[uname] = { role: "student", username: uname, password: "123", nickname: `同學 ${i}` };
+      added = true;
+    }
+  }
+  if (added) {
+    saveRegisteredAccounts(registered);
+  }
+}
+initializeDemoClass();
+
 function findAccount(role, username) {
   const registered = getRegisteredAccounts();
   if (registered[username] && registered[username].role === role) {
