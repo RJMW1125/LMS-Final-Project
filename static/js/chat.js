@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        system_instruction: { parts: [{ text: "你是 MoodStudy 的 AI 心靈園丁。你的任務是溫暖、同理地傾聽學生的心聲，給予心理支持與學習建議。" }] },
+                        system_instruction: { parts: [{ text: "你是 MoodStudy 的 AI 心靈園丁，任務是溫柔幽默地傾聽，並針對學生的課業學習、專案開發、或習慣養成等目標，給予心理支持與實質建議。" }] },
                         contents: sanitizedHistory 
                     })
                 }
