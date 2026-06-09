@@ -26,43 +26,47 @@ window.initPostcardEvents = function() {
 
     let currentPostcardData = null;
 
-    // 1. 點擊產生日誌明信片 -> 打開 Modal
+    // 以下事件只綁定一次，避免切換頁面時重複綁定導致執行多次
+    if (!window.postcardGlobalEventsBound) {
+        window.postcardGlobalEventsBound = true;
+
+        if (btnCancelJournal && journalModal) {
+            btnCancelJournal.addEventListener('click', () => {
+                journalModal.style.display = 'none';
+            });
+        }
+
+        if (btnConfirmJournal && journalModal) {
+            btnConfirmJournal.addEventListener('click', () => {
+                const userJournal = journalInput.value.trim() || "今天是很棒的一天，繼續保持！";
+                journalModal.style.display = 'none';
+                generatePostcard(userJournal);
+            });
+        }
+
+        if (btnCloseLightbox && galleryLightbox) {
+            btnCloseLightbox.addEventListener('click', () => {
+                galleryLightbox.style.display = 'none';
+                lightboxContent.innerHTML = '';
+            });
+        }
+
+        if (galleryLightbox) {
+            galleryLightbox.addEventListener('click', (e) => {
+                if (e.target === galleryLightbox) {
+                    galleryLightbox.style.display = 'none';
+                    lightboxContent.innerHTML = '';
+                }
+            });
+        }
+    }
+
+    // 1. 點擊產生日誌明信片 -> 顯示 Modal
+    // 這裡的按鈕每次都會被重新渲染，所以每次都要重新綁定
     if (btnGenerate && journalModal) {
         btnGenerate.addEventListener('click', () => {
             journalInput.value = '';
             journalModal.style.display = 'flex';
-        });
-    }
-
-    if (btnCancelJournal && journalModal) {
-        btnCancelJournal.addEventListener('click', () => {
-            journalModal.style.display = 'none';
-        });
-    }
-
-    // 2. 確定生成明信片
-    if (btnConfirmJournal && journalModal) {
-        btnConfirmJournal.addEventListener('click', () => {
-            const userJournal = journalInput.value.trim() || "今天是很棒的一天，繼續保持！";
-            journalModal.style.display = 'none';
-            generatePostcard(userJournal);
-        });
-    }
-
-    if (btnCloseLightbox && galleryLightbox) {
-        btnCloseLightbox.addEventListener('click', () => {
-            galleryLightbox.style.display = 'none';
-            lightboxContent.innerHTML = '';
-        });
-    }
-
-    // 點擊外部區域也能關閉 Lightbox
-    if (galleryLightbox) {
-        galleryLightbox.addEventListener('click', (e) => {
-            if (e.target === galleryLightbox) {
-                galleryLightbox.style.display = 'none';
-                lightboxContent.innerHTML = '';
-            }
         });
     }
 

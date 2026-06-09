@@ -899,8 +899,8 @@ function renderMemeModule() {
 
   // 當畫面渲染完成後，重新綁定 gacha 與 postcard 的事件
   setTimeout(() => {
-      if (typeof initGachaEvents === 'function') initGachaEvents();
-      if (typeof initPostcardEvents === 'function') initPostcardEvents();
+      if (typeof window.initGachaEvents === 'function') window.initGachaEvents();
+      if (typeof window.initPostcardEvents === 'function') window.initPostcardEvents();
   }, 100);
 }
 
@@ -922,7 +922,7 @@ function renderPopcatModule() {
 
   // 當畫面渲染完成後，重新綁定 popcat 的事件
   setTimeout(() => {
-      if (typeof initPopcatEvents === 'function') initPopcatEvents();
+      if (typeof window.initPopcatEvents === 'function') window.initPopcatEvents();
   }, 100);
 }
 
