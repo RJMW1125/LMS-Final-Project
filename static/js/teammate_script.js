@@ -627,6 +627,11 @@ function topbar(simple = false) {
 }
 
 function renderLogin() {
+  const chatBtn = document.getElementById("chat-widget-btn");
+  const chatWindow = document.getElementById("chat-widget-window");
+  if (chatBtn) chatBtn.style.display = "none";
+  if (chatWindow) chatWindow.classList.add("hidden-widget");
+
   app.innerHTML = `
     <div class="app-frame">
       ${loginTopbar()}
@@ -814,6 +819,9 @@ function renderMobileMenu(page) {
 }
 
 function appLayout(page, title, content) {
+  const chatBtn = document.getElementById("chat-widget-btn");
+  if (chatBtn) chatBtn.style.display = "flex";
+  
   app.innerHTML = `
     <div class="app-frame workspace">
       <aside class="sidebar">

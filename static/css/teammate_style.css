@@ -37,6 +37,13 @@ button, input, textarea { font-family: inherit; }
   box-shadow: var(--shadow);
 }
 
+.app-frame.workspace {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  border-radius: 0;
+}
+
 .topbar {
   height: 74px;
   padding: 0 28px;
