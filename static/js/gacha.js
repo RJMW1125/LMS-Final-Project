@@ -5,46 +5,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const revealArea = document.getElementById('card-reveal-area');
     const actionsArea = document.getElementById('gacha-actions');
     const btnDrawAgain = document.getElementById('btn-draw-again');
+    const moodInput = document.getElementById('gacha-mood-input');
 
     let tokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
     if (tokenDisplay) tokenDisplay.innerText = tokens;
 
-    const rarityConfig = {
-        'SSR': { color: '#FFD700', keyword: 'epic win meme', title: '傳說迷因降臨', msg: '神蹟降臨！今天的你無人能擋。' },
-        'SR': { color: '#C0C0C0', keyword: 'good job meme', title: '稀有迷因發現', msg: '不急不躁，這才是高手的境界。' },
-        'N': { color: '#cd7f32', keyword: 'funny cat', title: '日常迷因', msg: '雖然很慌，但還是活下來了。' }
-    };
-
     // 一次性決定 3 張卡的資料
-    async function generateCardsData() {
+    async function generateCardsData(userMood) {
         const cards = [];
         for (let i = 0; i < 3; i++) {
-            const roll = Math.random();
-            let rarity = 'N';
-            if (roll < 0.05) rarity = 'SSR';
-            else if (roll < 0.25) rarity = 'SR';
-
-            const config = rarityConfig[rarity];
             let finalImgUrl = '';
             
             try {
-                // 呼叫後端 API 隱藏金鑰
-                const res = await fetch(`http://127.0.0.1:5000/api/meme?status=${rarity}`);
+                // 呼叫後端 API 隱藏金鑰，並傳入使用者的心情
+                const statusQuery = userMood ? encodeURIComponent(userMood) : 'random meme';
+                const res = await fetch(`http://127.0.0.1:5000/api/meme?status=${statusQuery}`);
                 if (!res.ok) throw new Error("Backend API error or rate limit");
                 const data = await res.json();
                 if (!data.success) throw new Error("GIPHY API failed");
                 finalImgUrl = data.imgUrl;
             } catch (err) {
                 // 若後端掛掉、API 額度用盡，啟用本地備案圖庫
-                const fallbackMemes = {
-                    'SSR': 'https://i.imgflip.com/2cp3na.jpg',
-                    'SR': 'https://i.imgflip.com/9vct.jpg',
-                    'N': 'https://i.imgflip.com/1iruch.jpg'
-                };
-                finalImgUrl = fallbackMemes[rarity];
+                const fallbackMemes = [
+                    'https://i.imgflip.com/2cp3na.jpg',
+                    'https://i.imgflip.com/9vct.jpg',
+                    'https://i.imgflip.com/1iruch.jpg',
+                    'https://i.imgflip.com/261o3j.jpg'
+                ];
+                finalImgUrl = fallbackMemes[Math.floor(Math.random() * fallbackMemes.length)];
             }
             
-            cards.push({ rarity, config, finalImgUrl });
+            cards.push({ finalImgUrl, userText: userMood || "這是一張神秘的迷因卡" });
         }
         return cards;
     }
@@ -55,11 +46,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const userMood = moodInput ? moodInput.value.trim() : "";
+
         tokens -= 1;
         localStorage.setItem('lms_tokens', tokens);
         tokenDisplay.innerText = tokens;
         
         btnStartDraw.style.display = 'none';
+        if (moodInput) moodInput.style.display = 'none';
+
         spreadArea.style.display = 'flex';
         spreadArea.innerHTML = '<p style="color:#666; font-weight:bold; font-size:1.2em;">命運洗牌中...</p>';
         revealArea.classList.add('hidden');
@@ -67,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsArea.style.display = 'none';
 
         // 生成卡牌資料
-        const cardsData = await generateCardsData();
+        const cardsData = await generateCardsData(userMood);
 
         spreadArea.innerHTML = '';
         
@@ -130,10 +125,12 @@ document.addEventListener('DOMContentLoaded', () => {
             spreadArea.style.display = 'none';
             revealArea.classList.remove('hidden');
 
+            const cardColor = '#8e44ad'; // 統一的專屬心情卡顏色 (紫色)
+
             revealArea.innerHTML = `
                 <div id="gacha-card" style="
                     width: 250px; 
-                    height: 350px; 
+                    height: 380px; 
                     perspective: 1000px;
                 ">
                     <div id="gacha-card-inner" style="
@@ -166,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             height: 100%; 
                             backface-visibility: hidden; 
                             background: white;
-                            border: 4px solid ${chosenData.config.color};
+                            border: 4px solid ${cardColor};
                             border-radius: 12px;
                             transform: rotateY(180deg);
                             display: flex;
@@ -174,14 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             align-items: center;
                             padding: 15px;
                             box-sizing: border-box;
-                            box-shadow: 0 0 20px ${chosenData.config.color}88;
+                            box-shadow: 0 0 20px ${cardColor}88;
                         ">
-                            <span style="font-size: 1.2em; font-weight: bold; color: ${chosenData.config.color};">【${chosenData.rarity}】</span>
-                            <h3 style="margin: 10px 0; color: #333; font-size: 1.1em; text-align: center;">${chosenData.config.title}</h3>
-                            <div style="flex-grow: 1; width: 100%; display: flex; align-items: center; justify-content: center;">
-                                <img src="${chosenData.finalImgUrl}" style="max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 8px;">
+                            <span style="font-size: 1.1em; font-weight: bold; color: ${cardColor};">【專屬心情卡】</span>
+                            <div style="flex-grow: 1; width: 100%; display: flex; align-items: center; justify-content: center; margin: 15px 0;">
+                                <img src="${chosenData.finalImgUrl}" style="max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px;">
                             </div>
-                            <p style="color: #666; margin-top: 10px; font-size: 0.9em; text-align: center;"><i>"${chosenData.config.msg}"</i></p>
+                            <p style="color: #333; margin-top: 5px; font-size: 1em; text-align: center; font-weight: bold; line-height: 1.4;"><i>"${chosenData.userText}"</i></p>
                         </div>
                     </div>
                 </div>
@@ -192,8 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
             gallery.push({
                 id: 'meme_' + Date.now(),
                 url: chosenData.finalImgUrl,
-                rarity: chosenData.rarity,
-                title: chosenData.config.title,
+                rarity: '心情卡',
+                title: chosenData.userText,
                 date: new Date().toISOString().split('T')[0]
             });
             localStorage.setItem('lms_meme_gallery', JSON.stringify(gallery));
@@ -221,5 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
         revealArea.classList.add('hidden');
         revealArea.innerHTML = '';
         btnStartDraw.style.display = 'inline-block';
+        if (moodInput) {
+            moodInput.style.display = 'inline-block';
+            moodInput.value = '';
+        }
     });
 });
