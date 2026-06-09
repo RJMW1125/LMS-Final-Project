@@ -9,7 +9,7 @@ const todayKey = window.getLocalDateString();
 Gemini API Key 通常會長得像：AIzaSy...
 */
 const GEMINI_API_KEY = "AQ.Ab8RN6LnphR9ki-Es7XHO33Q8SQszr7cAhLuwtNJDvmQupWhoA";
-const GEMINI_MODEL = "gemini-1.5-flash-latest";
+const GEMINI_MODEL = "gemini-1.5-flash";
 
 const TOKEN_REWARD_MAIN = 3;
 const TOKEN_REWARD_SUB = 1;
