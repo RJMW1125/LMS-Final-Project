@@ -13,7 +13,7 @@ window.initGachaEvents = function() {
 
     // 每日抽卡次數限制邏輯 (測試中，暫時改為 999)
     const MAX_DAILY_DRAWS = 999;
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = window.getLocalDateString();
     let lastDrawDate = localStorage.getItem('lms_last_draw_date') || '';
     let dailyDraws = parseInt(localStorage.getItem('lms_daily_draws')) || 0;
 
@@ -213,7 +213,7 @@ window.initGachaEvents = function() {
                 url: chosenData.finalImgUrl,
                 rarity: '心情卡',
                 title: chosenData.userText,
-                date: new Date().toISOString().split('T')[0]
+                date: window.getLocalDateString()
             });
             localStorage.setItem('lms_meme_gallery', JSON.stringify(gallery));
 

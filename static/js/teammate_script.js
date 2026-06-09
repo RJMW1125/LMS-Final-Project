@@ -1,7 +1,8 @@
 
 const app = document.getElementById("app");
 
-const todayKey = new Date().toISOString().slice(0, 10);
+window.getLocalDateString = function(d = new Date()) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const todayKey = window.getLocalDateString();
 
 /* ===== Gemini AI 設定 =====
 請把 YOUR_GEMINI_API_KEY_HERE 換成你的 Gemini API Key。
@@ -484,7 +485,7 @@ function getWeekDates(baseDate = new Date()) {
   for (let i = 0; i < 7; i++) {
     const d = new Date(sunday);
     d.setDate(sunday.getDate() + i);
-    dates.push(d.toISOString().slice(0, 10));
+    dates.push(window.getLocalDateString(d));
   }
   return dates;
 }
@@ -941,7 +942,7 @@ function getStudentCurrentConsecutiveDays(student) {
 
   let count = 0;
   while (true) {
-    const key = cursor.toISOString().slice(0, 10);
+    const key = window.getLocalDateString(cursor);
     if (!checkedSet.has(key)) break;
     count += 1;
     cursor.setDate(cursor.getDate() - 1);
@@ -1522,7 +1523,7 @@ function getCurrentConsecutiveDays() {
 
   let count = 0;
   while (true) {
-    const key = cursor.toISOString().slice(0, 10);
+    const key = window.getLocalDateString(cursor);
     if (!checkedSet.has(key)) break;
     count += 1;
     cursor.setDate(cursor.getDate() - 1);

@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             feedbackArea.style.display = 'block';
 
             const tasksCompleted = parseInt(document.getElementById('checkin-tasks').value) || 0;
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = window.getLocalDateString();
 
             // A. 將資料存入 localStorage
             let userRecords = JSON.parse(localStorage.getItem('lms_user_records')) || [];
@@ -279,7 +279,7 @@ function renderContributionGrid() {
     for (let i = daysToRender - 1; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
-        const dateString = d.toISOString().split('T')[0]; 
+        const dateString = window.getLocalDateString(d); 
         
         fullGridData.push({
             date: dateString,
