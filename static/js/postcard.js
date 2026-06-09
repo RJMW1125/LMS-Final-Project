@@ -1,4 +1,4 @@
-﻿window.initPostcardEvents = function() {
+window.initPostcardEvents = function() {
     const fallbackMemes = [
         'https://i.imgflip.com/2cp3na.jpg',
         'https://i.imgflip.com/9vct.jpg'
@@ -9,10 +9,17 @@
         window.currentPostcardData = null;
 
         document.addEventListener('click', (e) => {
-            const targetBtn = e.target.closest('button') || e.target;
-            
+            let targetBtn = e.target;
+            // 跳過文字節點
+            while (targetBtn && targetBtn.nodeType === 3) {
+                targetBtn = targetBtn.parentNode;
+            }
+            if (targetBtn && targetBtn.closest) {
+                targetBtn = targetBtn.closest('button') || targetBtn;
+            }
+
             // 1. 點擊產生日誌明信片 -> 顯示 Modal
-            if (targetBtn.id === 'btn-generate-postcard') {
+            if (targetBtn && targetBtn.id === 'btn-generate-postcard') {
                 const journalInput = document.getElementById('journal-input');
                 const journalModal = document.getElementById('journal-modal');
                 if (journalInput && journalModal) {
@@ -22,13 +29,13 @@
             }
 
             // 2. 取消產生日誌
-            if (targetBtn.id === 'btn-cancel-journal') {
+            if (targetBtn && targetBtn.id === 'btn-cancel-journal') {
                 const journalModal = document.getElementById('journal-modal');
                 if (journalModal) journalModal.style.display = 'none';
             }
 
             // 3. 確定產生日誌
-            if (targetBtn.id === 'btn-confirm-journal') {
+            if (targetBtn && targetBtn.id === 'btn-confirm-journal') {
                 const journalInput = document.getElementById('journal-input');
                 const journalModal = document.getElementById('journal-modal');
                 if (journalInput && journalModal) {
@@ -39,7 +46,7 @@
             }
 
             // 4. 關閉 Lightbox
-            if (targetBtn.id === 'btn-close-lightbox' || targetBtn.id === 'gallery-lightbox') {
+            if (targetBtn && (targetBtn.id === 'btn-close-lightbox' || targetBtn.id === 'gallery-lightbox')) {
                 const galleryLightbox = document.getElementById('gallery-lightbox');
                 const lightboxContent = document.getElementById('lightbox-content');
                 if (galleryLightbox) galleryLightbox.style.display = 'none';
@@ -47,7 +54,7 @@
             }
 
             // 5. 收藏至圖鑑
-            if (targetBtn.id === 'btn-save-gallery') {
+            if (targetBtn && targetBtn.id === 'btn-save-gallery') {
                 if (!window.currentPostcardData) return;
                 let gallery = JSON.parse(localStorage.getItem('lms_postcard_gallery_data')) || [];
                 gallery.push(window.currentPostcardData);
@@ -57,7 +64,7 @@
             }
 
             // 6. 下載圖片
-            if (targetBtn.id === 'btn-download') {
+            if (targetBtn && targetBtn.id === 'btn-download') {
                 const el = document.getElementById('postcard-element');
                 if (!el) return;
                 if (typeof html2canvas === 'undefined') {
@@ -66,7 +73,7 @@
                 }
                 html2canvas(el, { useCORS: true, allowTaint: false }).then(canvasElement => {
                     const link = document.createElement('a');
-                    link.download = "MemeLogic_Postcard_" + Date.now() + ".png";
+                    link.download = `MemeLogic_Postcard_${Date.now()}.png`;
                     link.href = canvasElement.toDataURL('image/png');
                     link.click();
                 }).catch(err => {
@@ -76,7 +83,7 @@
             }
 
             // 7. 分享
-            if (targetBtn.id === 'btn-share') {
+            if (targetBtn && targetBtn.id === 'btn-share') {
                 alert('🚀 分享功能即將推出！可以先下載圖片發到 IG 喔！');
             }
         });
@@ -139,23 +146,23 @@ window.generatePostcard = function(userJournal, fallbackMemes) {
                 journal: userJournal
             };
 
-            currentCanvas.innerHTML = \
+            currentCanvas.innerHTML = `
                 <div id="postcard-element" class="postcard-container" style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 15px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 2px; padding: 20px; position: relative; min-height: 400px; width: 320px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
                     <div class="postcard-stamp" style="position: absolute; top: 20px; right: 20px; width: 90px; height: 90px; border: 3px solid #d9534f; border-radius: 50%; color: #d9534f; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(15deg); font-weight: bold; font-family: 'Courier New', Courier, monospace; opacity: 0.8; z-index: 5; background: rgba(255,255,255,0.4);">
-                        <span class="postcard-stamp-date" style="font-size: 0.9em; margin-bottom: 2px;">\</span>
-                        <span class="postcard-stamp-text" style="font-size: 1.1em; letter-spacing: 1px;">✓ \</span>
+                        <span class="postcard-stamp-date" style="font-size: 0.9em; margin-bottom: 2px;">${todayDate}</span>
+                        <span class="postcard-stamp-text" style="font-size: 1.1em; letter-spacing: 1px;">✓ ${totalTasks}</span>
                     </div>
-                    <img src="\" crossorigin="anonymous" class="postcard-meme postcard-meme-1" style="position: relative; width: 100%; flex-grow: 1; max-height: 260px; object-fit: contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); margin-top: 10px; margin-bottom: 15px; z-index: 2;">
+                    <img src="${pikmin1}" crossorigin="anonymous" class="postcard-meme postcard-meme-1" style="position: relative; width: 100%; flex-grow: 1; max-height: 260px; object-fit: contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); margin-top: 10px; margin-bottom: 15px; z-index: 2;">
                     <div class="postcard-content" style="z-index: 10; margin-top: auto; background: rgba(255, 255, 255, 0.85); padding: 15px; border-radius: 8px;">
                         <div style="display: flex; justify-content: space-around; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; color: #444;">
-                            <span>🔥 專注: \天</span>
-                            <span>💦 焦慮: \天</span>
+                            <span>🔥 專注: ${focusDays}天</span>
+                            <span>💦 焦慮: ${anxiousDays}天</span>
                         </div>
                         <h4 style="margin: 0 0 5px 0; color: #2c3e50; display: flex; align-items: center; gap: 5px;">✍️ 今日日誌：</h4>
-                        <p style="color: #555; font-size: 0.95em; line-height: 1.5; margin: 0;">\</p>
+                        <p style="color: #555; font-size: 0.95em; line-height: 1.5; margin: 0;">${userJournal}</p>
                     </div>
                 </div>
-            \;
+            `;
         }, 1000);
     } catch(err) {
         console.error("generatePostcard exception:", err);
@@ -187,42 +194,42 @@ window.loadGallery = function() {
             const lightboxContent = document.getElementById('lightbox-content');
             if (!galleryLightbox || !lightboxContent) return;
             
-            lightboxContent.innerHTML = \
+            lightboxContent.innerHTML = `
                 <div class="postcard-container" style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 15px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 2px; padding: 20px; position: relative; min-height: 400px; width: 320px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
                     <div class="postcard-stamp" style="position: absolute; top: 20px; right: 20px; width: 90px; height: 90px; border: 3px solid #d9534f; border-radius: 50%; color: #d9534f; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(15deg); font-weight: bold; font-family: 'Courier New', Courier, monospace; opacity: 0.8; z-index: 5; background: rgba(255,255,255,0.4);">
-                        <span class="postcard-stamp-date" style="font-size: 0.9em; margin-bottom: 2px;">\</span>
-                        <span class="postcard-stamp-text" style="font-size: 1.1em; letter-spacing: 1px;">✓ \</span>
+                        <span class="postcard-stamp-date" style="font-size: 0.9em; margin-bottom: 2px;">${item.date}</span>
+                        <span class="postcard-stamp-text" style="font-size: 1.1em; letter-spacing: 1px;">✓ ${item.tasks}</span>
                     </div>
-                    <img src="\" crossorigin="anonymous" class="postcard-meme postcard-meme-1" style="position: relative; width: 100%; flex-grow: 1; max-height: 260px; object-fit: contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); margin-top: 10px; margin-bottom: 15px; z-index: 2;">
+                    <img src="${item.pikminUrl}" crossorigin="anonymous" class="postcard-meme postcard-meme-1" style="position: relative; width: 100%; flex-grow: 1; max-height: 260px; object-fit: contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); margin-top: 10px; margin-bottom: 15px; z-index: 2;">
                     <div class="postcard-content" style="z-index: 10; margin-top: auto; background: rgba(255, 255, 255, 0.85); padding: 15px; border-radius: 8px;">
                         <div style="display: flex; justify-content: space-around; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; color: #444;">
-                            <span>🔥 專注: \天</span>
-                            <span>💦 焦慮: \天</span>
+                            <span>🔥 專注: ${item.focus}天</span>
+                            <span>💦 焦慮: ${item.anxious}天</span>
                         </div>
                         <h4 style="margin: 0 0 5px 0; color: #2c3e50; display: flex; align-items: center; gap: 5px;">✍️ 今日日誌：</h4>
-                        <p style="color: #555; font-size: 0.95em; line-height: 1.5; margin: 0;">\</p>
+                        <p style="color: #555; font-size: 0.95em; line-height: 1.5; margin: 0;">${item.journal}</p>
                     </div>
                 </div>
-            \;
+            `;
             galleryLightbox.style.display = 'flex';
         });
 
-        cardItem.innerHTML = \
+        cardItem.innerHTML = `
             <div style="background: url('https://www.transparenttextures.com/patterns/cream-paper.png'), #fffdfa; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 2px; padding: 10px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; position: relative; overflow: hidden; pointer-events: none;">
                 <div style="position: absolute; top: 5px; right: 5px; border: 2px solid #d9534f; border-radius: 50%; color: #d9534f; transform: rotate(15deg); font-size: 0.7em; padding: 2px; text-align: center; font-weight: bold; opacity: 0.8; background: rgba(255,255,255,0.4); z-index: 5;">
-                    <div>\</div>
-                    <div>✓\</div>
+                    <div>${item.date.slice(5)}</div>
+                    <div>✓${item.tasks}</div>
                 </div>
-                <img src="\" crossorigin="anonymous" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; z-index: 2; position: relative;">
+                <img src="${item.pikminUrl}" crossorigin="anonymous" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; z-index: 2; position: relative;">
                 <div style="background: rgba(255,255,255,0.9); padding: 5px; border-radius: 4px; font-size: 0.8em; flex-grow: 1; z-index: 10;">
                     <div style="display:flex; justify-content: space-around; border-bottom: 1px dashed #ccc; padding-bottom: 5px; margin-bottom: 5px; font-weight: bold;">
-                        <span>🔥 \</span>
-                        <span>💦 \</span>
+                        <span>🔥 ${item.focus}</span>
+                        <span>💦 ${item.anxious}</span>
                     </div>
-                    <p style="margin: 0; color: #555; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">\</p>
+                    <p style="margin: 0; color: #555; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">${item.journal}</p>
                 </div>
             </div>
-        \;
+        `;
         galleryContainer.appendChild(cardItem);
     });
 
