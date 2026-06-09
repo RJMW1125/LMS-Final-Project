@@ -1,15 +1,15 @@
 
 const app = document.getElementById("app");
 
-window.getLocalDateString = function(d = new Date()) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+window.getLocalDateString = function (d = new Date()) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 const todayKey = window.getLocalDateString();
 
 /* ===== Gemini AI 設定 =====
 請把 YOUR_GEMINI_API_KEY_HERE 換成你的 Gemini API Key。
 Gemini API Key 通常會長得像：AIzaSy...
 */
-const GEMINI_API_KEY = "AQ.Ab8RN6JXOZ6tsJ2zE7v36K7ypaFOGYNZgPIGplf1G90DlVG7zA";
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_API_KEY = "AQ.Ab8RN6LnphR9ki-Es7XHO33Q8SQszr7cAhLuwtNJDvmQupWhoA";
+const GEMINI_MODEL = "gemini-1.5-flash";
 
 const TOKEN_REWARD_MAIN = 3;
 const TOKEN_REWARD_SUB = 1;
@@ -32,7 +32,7 @@ function updateTokens(amount) {
   const today = window.getLocalDateString();
   let savedDate = localStorage.getItem('lms_daily_earned_date');
   let dailyEarned = parseInt(localStorage.getItem('lms_daily_earned_tokens')) || 0;
-  
+
   if (savedDate !== today) {
     dailyEarned = 0;
     localStorage.setItem('lms_daily_earned_date', today);
@@ -57,7 +57,7 @@ function updateTokens(amount) {
     // 扣回機制 Clawback
     tokens += amount;
     if (tokens < 0) tokens = 0;
-    
+
     // 從每日額度扣回來，讓使用者可以再次賺取
     if (dailyEarned > 0) {
       dailyEarned += amount;
@@ -68,7 +68,7 @@ function updateTokens(amount) {
   }
 
   localStorage.setItem('lms_tokens', tokens);
-  
+
   // Update token display in topbar
   const tokenDisplay = document.getElementById("topbar-token-count");
   if (tokenDisplay) tokenDisplay.innerText = tokens;
@@ -311,7 +311,7 @@ function createAccount() {
 
   alert("註冊成功！請使用剛剛設定的帳號密碼登入。");
   resetToGuestState();
-renderLogin();
+  renderLogin();
 }
 
 
@@ -332,9 +332,9 @@ function normalizeTodos() {
       done: Boolean(todo?.done),
       subtasks: Array.isArray(todo?.subtasks)
         ? todo.subtasks.map(subtask => ({
-            text: typeof subtask === "string" ? subtask : (subtask?.text || "未命名小任務"),
-            done: typeof subtask === "string" ? false : Boolean(subtask?.done)
-          }))
+          text: typeof subtask === "string" ? subtask : (subtask?.text || "未命名小任務"),
+          done: typeof subtask === "string" ? false : Boolean(subtask?.done)
+        }))
         : []
     };
 
@@ -590,7 +590,7 @@ function weeklyMoodSummary() {
   if (moods.length === 0) return "本週尚未填寫學習狀態";
   const count = {};
   moods.forEach(m => count[m] = (count[m] || 0) + 1);
-  return Object.entries(count).sort((a,b)=>b[1]-a[1])[0][0];
+  return Object.entries(count).sort((a, b) => b[1] - a[1])[0][0];
 }
 
 function pressureLevelText(avg) {
@@ -810,7 +810,7 @@ function renderUserMenu() {
   `;
 }
 
-document.addEventListener("click", function(event) {
+document.addEventListener("click", function (event) {
   const wrap = event.target.closest(".user-menu-wrap");
   const menu = document.getElementById("userDropdownMenu");
   if (!wrap && menu) {
@@ -904,7 +904,7 @@ function renderMobileMenu(page) {
 function appLayout(page, title, content) {
   const chatBtn = document.getElementById("chat-widget-btn");
   if (chatBtn) chatBtn.style.display = "flex";
-  
+
   app.innerHTML = `
     <div class="app-frame workspace">
       <aside class="sidebar">
@@ -991,8 +991,8 @@ function renderMemeModule() {
 
   // 當畫面渲染完成後，重新綁定 gacha 與 postcard 的事件
   setTimeout(() => {
-      if (typeof window.initGachaEvents === 'function') window.initGachaEvents();
-      if (typeof window.initPostcardEvents === 'function') window.initPostcardEvents();
+    if (typeof window.initGachaEvents === 'function') window.initGachaEvents();
+    if (typeof window.initPostcardEvents === 'function') window.initPostcardEvents();
   }, 100);
 }
 
@@ -1014,7 +1014,7 @@ function renderPopcatModule() {
 
   // 當畫面渲染完成後，重新綁定 popcat 的事件
   setTimeout(() => {
-      if (typeof window.initPopcatEvents === 'function') window.initPopcatEvents();
+    if (typeof window.initPopcatEvents === 'function') window.initPopcatEvents();
   }, 100);
 }
 
@@ -1153,7 +1153,7 @@ function renderTeacherDashboard() {
   const total = students.length;
   const highRisk = students.filter(s => getRiskLevel(s).text === "高關注").length;
   const avgStressList = students.map(calcStudentAvgPressure).filter(v => v !== "-").map(Number);
-  const classAvg = avgStressList.length ? (avgStressList.reduce((a,b)=>a+b,0) / avgStressList.length).toFixed(1) : "-";
+  const classAvg = avgStressList.length ? (avgStressList.reduce((a, b) => a + b, 0) / avgStressList.length).toFixed(1) : "-";
   const avgStreak = total ? (students.reduce((sum, s) => sum + getStudentCurrentConsecutiveDays(s), 0) / total).toFixed(1) : "0";
 
   const rows = students.map(s => {
@@ -1698,9 +1698,9 @@ function renderMoodFeedback() {
     <div class="form-card">
       <h3>1. 你今天的學習狀態如何？</h3>
       <div class="moods">
-        ${["開心","普通","焦慮","疲累","沒動力"].map((m, i) => `
+        ${["開心", "普通", "焦慮", "疲累", "沒動力"].map((m, i) => `
           <label class="mood-card">
-            <span>${["😊","🙂","😰","😵","😞"][i]}</span>
+            <span>${["😊", "🙂", "😰", "😵", "😞"][i]}</span>
             <b>${m}</b>
             <input type="radio" name="mood" value="${m}" ${state.mood === m || (state.mood === "尚未填寫" && i === 0) ? "checked" : ""}>
           </label>
@@ -1911,7 +1911,7 @@ function buildCalendar() {
   const last = new Date(year, month + 1, 0);
   const startDay = first.getDay();
   const totalDays = last.getDate();
-  let cells = ["日","一","二","三","四","五","六"].map(d => `<div class="day-name">${d}</div>`).join("");
+  let cells = ["日", "一", "二", "三", "四", "五", "六"].map(d => `<div class="day-name">${d}</div>`).join("");
 
   for (let i = 0; i < startDay; i++) {
     cells += `<div></div>`;
@@ -2656,12 +2656,12 @@ function toggleSubtask(index, subIndex) {
   const wasMainDone = getTodoIsDone(todo);
   const nextDone = !todo.subtasks[subIndex].done;
   todo.subtasks[subIndex].done = nextDone;
-  
+
   if (nextDone) updateTokens(TOKEN_REWARD_SUB);
   else updateTokens(-TOKEN_REWARD_SUB);
 
   syncTodoDoneFromSubtasks(todo);
-  
+
   const isMainDone = getTodoIsDone(todo);
   if (!wasMainDone && isMainDone) updateTokens(TOKEN_REWARD_MAIN);
   else if (wasMainDone && !isMainDone) updateTokens(-TOKEN_REWARD_MAIN);
@@ -2680,7 +2680,7 @@ function deleteSubtask(index, subIndex) {
   if (confirm(`確定要刪除「${subtaskName}」嗎？`)) {
     if (subtask.done) updateTokens(-TOKEN_REWARD_SUB);
     todo.subtasks.splice(subIndex, 1);
-    
+
     const wasMainDone = getTodoIsDone(todo);
     syncTodoDoneFromSubtasks(todo);
     const isMainDone = getTodoIsDone(todo);
@@ -2723,10 +2723,10 @@ function clearDoneTodos() {
 renderLogin();
 
 
-function updateMonthGoal(days){
+function updateMonthGoal(days) {
   state.monthGoalDays = Number(days);
-  if(typeof saveState==='function') saveState();
-  if(typeof renderCalendar==='function') renderCalendar();
+  if (typeof saveState === 'function') saveState();
+  if (typeof renderCalendar === 'function') renderCalendar();
 }
 
 
