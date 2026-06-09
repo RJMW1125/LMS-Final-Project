@@ -9,8 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let tokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
     if (tokenDisplay) tokenDisplay.innerText = tokens;
 
-    const GIPHY_API_KEY = 'YOUR_GIPHY_API_KEY';
-
     const rarityConfig = {
         'SSR': { color: '#FFD700', keyword: 'epic win meme', title: '傳說迷因降臨', msg: '神蹟降臨！今天的你無人能擋。' },
         'SR': { color: '#C0C0C0', keyword: 'good job meme', title: '稀有迷因發現', msg: '不急不躁，這才是高手的境界。' },
@@ -30,11 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
             let finalImgUrl = '';
             
             try {
-                if (GIPHY_API_KEY === 'YOUR_GIPHY_API_KEY') throw new Error("No API Key");
-                const res = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${GIPHY_API_KEY}&tag=${encodeURIComponent(config.keyword)}&rating=pg-13`);
+                // 呼叫後端 API 隱藏金鑰
+                const res = await fetch(`http://127.0.0.1:5000/api/meme?status=${rarity}`);
+                if (!res.ok) throw new Error("Backend API error or rate limit");
                 const data = await res.json();
-                finalImgUrl = data.data.images.downsized_medium.url;
+                if (!data.success) throw new Error("GIPHY API failed");
+                finalImgUrl = data.imgUrl;
             } catch (err) {
+                // 若後端掛掉、API 額度用盡，啟用本地備案圖庫
                 const fallbackMemes = {
                     'SSR': 'https://i.imgflip.com/2cp3na.jpg',
                     'SR': 'https://i.imgflip.com/9vct.jpg',

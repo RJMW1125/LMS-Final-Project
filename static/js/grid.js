@@ -221,24 +221,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const tokenDisplay = document.getElementById('token-count');
             if (tokenDisplay) tokenDisplay.innerText = currentTokens;
 
-            // C. 呼叫 GIPHY API 獲取真實迷因 (若無 API Key 則 Fallback)
-            const GIPHY_API_KEY = 'YOUR_GIPHY_API_KEY'; // 替換為真實 API Key
-            const moodKeywords = {
-                'focus': 'laser focus',
-                'stable': 'calm down',
-                'anxious': 'panic',
-                'unmotivated': 'lazy cat'
-            };
-            
+            // C. 呼叫後端 API 獲取真實迷因 (保護金鑰)
             let finalImgUrl = '';
             try {
-                if (GIPHY_API_KEY === 'YOUR_GIPHY_API_KEY') throw new Error("No API Key");
-                const q = moodKeywords[selectedMood];
-                const res = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${GIPHY_API_KEY}&tag=${encodeURIComponent(q)}&rating=pg-13`);
+                const res = await fetch(`http://127.0.0.1:5000/api/meme?status=${selectedMood}`);
+                if (!res.ok) throw new Error("Backend API error or rate limit");
                 const data = await res.json();
-                finalImgUrl = data.data.images.downsized_medium.url;
+                if (!data.success) throw new Error("GIPHY API failed");
+                finalImgUrl = data.imgUrl;
             } catch (err) {
-                // Fallback 靜態圖庫
+                // 額度用完或網路錯誤時，退回靜態假圖庫
                 const fallbackMemes = {
                     'focus': 'https://i.imgflip.com/261o3j.jpg',
                     'stable': 'https://i.imgflip.com/9vct.jpg',
