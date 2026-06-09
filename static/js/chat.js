@@ -57,30 +57,45 @@ document.addEventListener('DOMContentLoaded', () => {
         chatContainer.innerHTML += `<div id="${loadingId}" style="color: gray; font-style: italic;">園丁正在整理思緒...</div>`;
 
         try {
-            // 將包含歷史紀錄的陣列發送給 Flask 後端
-            const response = await fetch('http://127.0.0.1:5000/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ history: chatHistory }) // 打包整個陣列送出
-            });
+            if (typeof GEMINI_API_KEY === "undefined" || !GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+                throw new Error("API Key 未設定");
+            }
+
+            const formattedHistory = chatHistory.map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.content }]
+            }));
+
+            // 在歷史記錄最前面加入系統提示詞 (System Prompt) 讓 AI 扮演心靈園丁
+            if (formattedHistory.length > 0 && formattedHistory[0].role === 'user') {
+                 formattedHistory[0].parts[0].text = "你是 MoodStudy 的 AI 心靈園丁。你的任務是溫暖、同理地傾聽學生的心聲，給予心理支持與學習建議。\n使用者說：" + formattedHistory[0].parts[0].text;
+            }
+
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${typeof GEMINI_MODEL !== "undefined" ? GEMINI_MODEL : 'gemini-2.0-flash'}:generateContent?key=${GEMINI_API_KEY}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: formattedHistory })
+                }
+            );
             
             const data = await response.json();
             document.getElementById(loadingId).remove();
             
-            if (response.ok) {
-                // 顯示 AI 回覆，並存入歷史陣列
-                appendMessage('心靈園丁', data.reply);
-                chatHistory.push({ role: 'model', content: data.reply });
+            if (response.ok && data.candidates && data.candidates.length > 0) {
+                const replyText = data.candidates[0].content.parts[0].text;
+                appendMessage('心靈園丁', replyText);
+                chatHistory.push({ role: 'model', content: replyText });
                 
-                // 更新 localStorage，確保重整網頁後記憶還在
                 localStorage.setItem('lms_chat_history', JSON.stringify(chatHistory));
             } else {
-                appendMessage('系統', data.error || '連線發生錯誤');
+                appendMessage('系統', 'API 回傳發生錯誤');
             }
             
         } catch (error) {
             document.getElementById(loadingId).remove();
-            appendMessage('系統', '無法連接到伺服器，請確認 Flask 後端已啟動。');
+            appendMessage('系統', '無法連接到 AI 服務，請確認網路與 API 狀態。');
         }
     });
 
