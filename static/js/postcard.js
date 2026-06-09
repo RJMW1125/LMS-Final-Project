@@ -42,14 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. 獲取最近抽到的迷因圖 (作為皮克敏)
         let memeGallery = JSON.parse(localStorage.getItem('lms_meme_gallery')) || [];
         let pikmin1 = fallbackMemes[0];
-        let pikmin2 = fallbackMemes[1];
         
-        if (memeGallery.length >= 2) {
-            // 取最後兩張
+        if (memeGallery.length >= 1) {
+            // 取最新的一張
             pikmin1 = memeGallery[memeGallery.length - 1].url;
-            pikmin2 = memeGallery[memeGallery.length - 2].url;
-        } else if (memeGallery.length === 1) {
-            pikmin1 = memeGallery[0].url;
         }
 
         const todayDate = new Date().toISOString().split('T')[0];
@@ -69,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <!-- 像皮克敏一樣在畫面上點綴的迷因圖 -->
                 <img src="${pikmin1}" crossorigin="anonymous" class="postcard-meme postcard-meme-1">
-                <img src="${pikmin2}" crossorigin="anonymous" class="postcard-meme postcard-meme-2">
 
                 <!-- 統計資料與 AI 結語 -->
                 <div class="postcard-content">
