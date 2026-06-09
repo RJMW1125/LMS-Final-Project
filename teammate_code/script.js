@@ -1,8 +1,7 @@
 
 const app = document.getElementById("app");
 
-window.getLocalDateString = function(d = new Date()) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-const todayKey = window.getLocalDateString();
+const todayKey = new Date().toISOString().slice(0, 10);
 
 /* ===== Gemini AI 設定 =====
 請把 YOUR_GEMINI_API_KEY_HERE 換成你的 Gemini API Key。
@@ -10,70 +9,6 @@ Gemini API Key 通常會長得像：AIzaSy...
 */
 const GEMINI_API_KEY = "AQ.Ab8RN6JXOZ6tsJ2zE7v36K7ypaFOGYNZgPIGplf1G90DlVG7zA";
 const GEMINI_MODEL = "gemini-2.0-flash";
-
-const TOKEN_REWARD_MAIN = 3;
-const TOKEN_REWARD_SUB = 1;
-const MAX_DAILY_TOKENS = 15;
-
-function showToast(message) {
-  let toast = document.getElementById("token-toast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "token-toast";
-    toast.className = "toast-message";
-    document.body.appendChild(toast);
-  }
-  toast.innerText = message;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
-}
-
-function updateTokens(amount) {
-  const today = window.getLocalDateString();
-  let savedDate = localStorage.getItem('lms_daily_earned_date');
-  let dailyEarned = parseInt(localStorage.getItem('lms_daily_earned_tokens')) || 0;
-  
-  if (savedDate !== today) {
-    dailyEarned = 0;
-    localStorage.setItem('lms_daily_earned_date', today);
-  }
-
-  let tokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
-
-  if (amount > 0) {
-    const spaceLeft = MAX_DAILY_TOKENS - dailyEarned;
-    if (spaceLeft <= 0) {
-      showToast("🎉 完成任務！(今日代幣獲取已達上限 " + MAX_DAILY_TOKENS + " 枚)");
-      if (typeof window.confetti === 'function') window.confetti();
-      return;
-    }
-    const actualEarned = Math.min(amount, spaceLeft);
-    tokens += actualEarned;
-    dailyEarned += actualEarned;
-    localStorage.setItem('lms_daily_earned_tokens', dailyEarned);
-    showToast("🎉 恭喜完成任務！獲得 " + actualEarned + " 枚代幣！");
-    if (typeof window.confetti === 'function') window.confetti();
-  } else if (amount < 0) {
-    // 扣回機制 Clawback
-    tokens += amount;
-    if (tokens < 0) tokens = 0;
-    
-    // 從每日額度扣回來，讓使用者可以再次賺取
-    if (dailyEarned > 0) {
-      dailyEarned += amount;
-      if (dailyEarned < 0) dailyEarned = 0;
-      localStorage.setItem('lms_daily_earned_tokens', dailyEarned);
-    }
-    showToast("⚠️ 任務狀態變更，已扣回 " + Math.abs(amount) + " 枚代幣");
-  }
-
-  localStorage.setItem('lms_tokens', tokens);
-  
-  // Update token display in topbar
-  const tokenDisplay = document.getElementById("topbar-token-count");
-  if (tokenDisplay) tokenDisplay.innerText = tokens;
-}
-
 const now = new Date();
 
 function defaultUserState() {
@@ -549,7 +484,7 @@ function getWeekDates(baseDate = new Date()) {
   for (let i = 0; i < 7; i++) {
     const d = new Date(sunday);
     d.setDate(sunday.getDate() + i);
-    dates.push(window.getLocalDateString(d));
+    dates.push(d.toISOString().slice(0, 10));
   }
   return dates;
 }
@@ -671,7 +606,6 @@ function getPressureAdvice() {
 }
 
 function topbar(simple = false) {
-  const currentTokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
   return `
     <header class="topbar">
       <div class="logo" onclick="renderLogin()">
@@ -684,9 +618,7 @@ function topbar(simple = false) {
           <button onclick="renderAI()">AI 學習引導</button>
         </nav>
         <div class="top-actions">
-          <div class="token-badge" title="目前代幣數量">
-            🪙 <span id="topbar-token-count">${currentTokens}</span>
-          </div>
+          
           <button class="user-btn">${currentName()}⌄</button>
         </div>`}
     </header>
@@ -694,11 +626,6 @@ function topbar(simple = false) {
 }
 
 function renderLogin() {
-  const chatBtn = document.getElementById("chat-widget-btn");
-  const chatWindow = document.getElementById("chat-widget-window");
-  if (chatBtn) chatBtn.style.display = "none";
-  if (chatWindow) chatWindow.classList.add("hidden-widget");
-
   app.innerHTML = `
     <div class="app-frame">
       ${loginTopbar()}
@@ -886,9 +813,6 @@ function renderMobileMenu(page) {
 }
 
 function appLayout(page, title, content) {
-  const chatBtn = document.getElementById("chat-widget-btn");
-  if (chatBtn) chatBtn.style.display = "flex";
-  
   app.innerHTML = `
     <div class="app-frame workspace">
       <aside class="sidebar">
@@ -897,8 +821,6 @@ function appLayout(page, title, content) {
           <button class="${page === "mood" ? "active" : ""}" onclick="renderMoodFeedback()">學習狀態回饋</button>
           <button class="${page === "ai" ? "active" : ""}" onclick="renderAI()">AI 學習分析</button>
           <button class="${page === "calendar" ? "active" : ""}" onclick="renderCalendar()">連續學習</button>
-          <button class="${page === "gacha" ? "active" : ""}" onclick="renderMemeModule()" style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px; color: #d9534f; font-weight: bold;">🎁 迷因獎勵</button>
-          <button class="${page === "popcat" ? "active" : ""}" onclick="renderPopcatModule()" style="color: #fb8532; font-weight: bold;">🐱 壓力釋放</button>
         </nav>
         <div class="side-bottom">
           <button onclick="logout()">登出</button>
@@ -919,88 +841,7 @@ function appLayout(page, title, content) {
   `;
 }
 
-function renderMemeModule() {
-  const content = `
-      <section id="module-gacha" class="page-section active" style="padding: 0;">
-          <h2 style="margin-bottom: 20px;">🎮 迷因修煉抽卡</h2>
-          <div class="gacha-dashboard" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center;">
-              <p style="font-size: 1.2em; font-weight: bold;">目前代幣：<span id="token-count" style="color: var(--color-stable); font-size: 1.3em;">15</span> 🪙 &nbsp;&nbsp;|&nbsp;&nbsp; 今日抽卡：<span id="daily-draw-count">0</span> / ∞ 次 (測試中)</p>
-              <div style="margin: 15px 0;">
-                  <input type="text" id="gacha-mood-input" placeholder="說說你現在的心情或關鍵字..." autocomplete="off" style="padding: 12px; width: 300px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;">
-              </div>
-              <button id="btn-start-draw-session" class="btn-squish" style="background-color: var(--color-stable); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: transform 0.2s;">消耗 1 幣開始發牌</button>
-          </div>
 
-          <div id="cards-spread-area" style="display: none; justify-content: center; gap: 20px; margin-top: 30px; perspective: 1000px; flex-wrap: wrap; min-height: 380px; align-items: center;">
-          </div>
-          
-          <div id="card-reveal-area" class="hidden" style="display: flex; flex-direction: column; align-items: center;">
-          </div>
-
-          <div id="gacha-actions" style="display: none; text-align: center; margin-top: 20px;">
-               <button id="btn-draw-again" class="btn-squish" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">再抽一次</button>
-          </div>
-
-          <hr style="border: 0; border-top: 1px solid #eee; margin: 40px 0;">
-
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <h2 style="margin: 0;">🖼️ 專屬明信片與圖鑑</h2>
-              <button id="btn-generate-postcard" class="btn-squish" style="background: var(--color-stable); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: transform 0.2s;">✨ 產生日誌明信片</button>
-          </div>
-
-          <div id="loading-screen" style="display: none; text-align: center; margin: 20px 0;">
-              <p style="color: var(--color-stable); font-weight: bold;">正在打包你的回憶，繪製明信片中...</p>
-          </div>
-
-          <div id="postcard-preview-area" style="display: none; flex-direction: column; align-items: center; margin-bottom: 30px;">
-              <div id="postcard-canvas">
-              </div>
-              
-              <div id="postcard-actions" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                  <button id="btn-save-gallery" class="btn-squish" style="background-color: #ffc107; color: #333; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">⭐ 收藏至圖鑑</button>
-                  <button id="btn-download" class="btn-squish" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">📥 下載圖片</button>
-                  <button id="btn-share" class="btn-squish" style="background-color: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">🌐 分享社群</button>
-              </div>
-          </div>
-
-          <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-top: 20px;">
-              <h3 style="margin-top: 0;">📚 我的旅行圖鑑</h3>
-              <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">這裡收藏了你過去結算的每一張明信片回憶。</p>
-              <div id="gallery-container" class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
-              </div>
-          </div>
-      </section>
-  `;
-  appLayout("gacha", "迷因獎勵與回憶", content);
-
-  // 當畫面渲染完成後，重新綁定 gacha 與 postcard 的事件
-  setTimeout(() => {
-      if (typeof window.initGachaEvents === 'function') window.initGachaEvents();
-      if (typeof window.initPostcardEvents === 'function') window.initPostcardEvents();
-  }, 100);
-}
-
-function renderPopcatModule() {
-  const content = `
-      <section id="module-popcat" class="page-section active" style="padding: 0;">
-          <div style="background: white; padding: 40px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center;">
-              <h2 style="margin-top: 0;">🐱 壓力釋放區</h2>
-              <p style="color: #666; font-size: 1.1em; margin-bottom: 30px;">讀書讀到快崩潰？瘋狂點擊貓貓釋放壓力吧！</p>
-              <div id="popcat-container" style="text-align: center; user-select: none;">
-                  <img id="popcat-img" src="../static/images/popcat1.png" alt="Pop Cat" width="250" style="cursor: pointer; transition: transform 0.05s;">
-                  <p style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">點擊次數：<span id="popcat-score" style="color: #d9534f; font-size: 1.5em;">0</span></p>
-              </div>
-              <audio id="popcat-sound" src="../static/sounds/pop.mp3"></audio>
-          </div>
-      </section>
-  `;
-  appLayout("popcat", "壓力釋放區", content);
-
-  // 當畫面渲染完成後，重新綁定 popcat 的事件
-  setTimeout(() => {
-      if (typeof window.initPopcatEvents === 'function') window.initPopcatEvents();
-  }, 100);
-}
 
 function getStudentTotalCheckinDays(student) {
   return Array.isArray(student.checkinDates) ? new Set(student.checkinDates).size : 0;
@@ -1017,7 +858,7 @@ function getStudentCurrentConsecutiveDays(student) {
 
   let count = 0;
   while (true) {
-    const key = window.getLocalDateString(cursor);
+    const key = cursor.toISOString().slice(0, 10);
     if (!checkedSet.has(key)) break;
     count += 1;
     cursor.setDate(cursor.getDate() - 1);
@@ -1598,7 +1439,7 @@ function getCurrentConsecutiveDays() {
 
   let count = 0;
   while (true) {
-    const key = window.getLocalDateString(cursor);
+    const key = cursor.toISOString().slice(0, 10);
     if (!checkedSet.has(key)) break;
     count += 1;
     cursor.setDate(cursor.getDate() - 1);
@@ -2531,22 +2372,9 @@ function toggleTodo(index) {
   const nextDone = !getTodoIsDone(todo);
   todo.done = nextDone;
 
-  let tokenDelta = 0;
   if (Array.isArray(todo.subtasks) && todo.subtasks.length > 0) {
-    if (nextDone) {
-      const uncompletedSubtasks = todo.subtasks.filter(s => !s.done).length;
-      tokenDelta += (uncompletedSubtasks * TOKEN_REWARD_SUB);
-    } else {
-      const completedSubtasks = todo.subtasks.filter(s => s.done).length;
-      tokenDelta -= (completedSubtasks * TOKEN_REWARD_SUB);
-    }
     todo.subtasks = todo.subtasks.map(subtask => ({ ...subtask, done: nextDone }));
   }
-
-  if (nextDone) tokenDelta += TOKEN_REWARD_MAIN;
-  else tokenDelta -= TOKEN_REWARD_MAIN;
-
-  if (tokenDelta !== 0) updateTokens(tokenDelta);
 
   syncTodayCheckinTaskStatus();
   save();
@@ -2564,18 +2392,8 @@ function addTodo() {
 }
 
 function deleteTodo(index) {
-  const todo = state.todos[index];
-  if (!todo) return;
-  const taskName = todo.text || "這個任務";
+  const taskName = state.todos[index]?.text || "這個任務";
   if (confirm(`確定要刪除「${taskName}」嗎？`)) {
-    let deductTokens = 0;
-    if (getTodoIsDone(todo)) deductTokens -= TOKEN_REWARD_MAIN;
-    if (Array.isArray(todo.subtasks)) {
-      const doneSub = todo.subtasks.filter(s => s.done).length;
-      deductTokens -= (doneSub * TOKEN_REWARD_SUB);
-    }
-    if (deductTokens !== 0) updateTokens(deductTokens);
-
     state.todos.splice(index, 1);
     syncTodayCheckinTaskStatus();
     save();
@@ -2637,19 +2455,8 @@ function toggleSubtask(index, subIndex) {
   const todo = state.todos[index];
   if (!todo || !Array.isArray(todo.subtasks) || !todo.subtasks[subIndex]) return;
 
-  const wasMainDone = getTodoIsDone(todo);
-  const nextDone = !todo.subtasks[subIndex].done;
-  todo.subtasks[subIndex].done = nextDone;
-  
-  if (nextDone) updateTokens(TOKEN_REWARD_SUB);
-  else updateTokens(-TOKEN_REWARD_SUB);
-
+  todo.subtasks[subIndex].done = !todo.subtasks[subIndex].done;
   syncTodoDoneFromSubtasks(todo);
-  
-  const isMainDone = getTodoIsDone(todo);
-  if (!wasMainDone && isMainDone) updateTokens(TOKEN_REWARD_MAIN);
-  else if (wasMainDone && !isMainDone) updateTokens(-TOKEN_REWARD_MAIN);
-
   syncTodayCheckinTaskStatus();
   save();
   renderAI();
@@ -2659,18 +2466,10 @@ function deleteSubtask(index, subIndex) {
   const todo = state.todos[index];
   if (!todo || !Array.isArray(todo.subtasks) || !todo.subtasks[subIndex]) return;
 
-  const subtask = todo.subtasks[subIndex];
-  const subtaskName = subtask.text || "這個小任務";
+  const subtaskName = todo.subtasks[subIndex].text || "這個小任務";
   if (confirm(`確定要刪除「${subtaskName}」嗎？`)) {
-    if (subtask.done) updateTokens(-TOKEN_REWARD_SUB);
     todo.subtasks.splice(subIndex, 1);
-    
-    const wasMainDone = getTodoIsDone(todo);
     syncTodoDoneFromSubtasks(todo);
-    const isMainDone = getTodoIsDone(todo);
-    if (!wasMainDone && isMainDone) updateTokens(TOKEN_REWARD_MAIN);
-    else if (wasMainDone && !isMainDone) updateTokens(-TOKEN_REWARD_MAIN);
-
     syncTodayCheckinTaskStatus();
     save();
     renderAI();
@@ -2685,18 +2484,6 @@ function clearDoneTodos() {
   }
 
   if (confirm(`確定要刪除 ${doneCount} 個已完成任務嗎？`)) {
-    let deductTokens = 0;
-    state.todos.forEach(todo => {
-      if (getTodoIsDone(todo)) {
-        deductTokens -= TOKEN_REWARD_MAIN;
-        if (Array.isArray(todo.subtasks)) {
-          const doneSub = todo.subtasks.filter(s => s.done).length;
-          deductTokens -= (doneSub * TOKEN_REWARD_SUB);
-        }
-      }
-    });
-    if (deductTokens !== 0) updateTokens(deductTokens);
-
     state.todos = state.todos.filter(todo => !getTodoIsDone(todo));
     syncTodayCheckinTaskStatus();
     save();

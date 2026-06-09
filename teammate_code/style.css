@@ -37,13 +37,6 @@ button, input, textarea { font-family: inherit; }
   box-shadow: var(--shadow);
 }
 
-.app-frame.workspace {
-  width: 100%;
-  min-height: 100vh;
-  margin: 0;
-  border-radius: 0;
-}
-
 .topbar {
   height: 74px;
   padding: 0 28px;
@@ -5072,7 +5065,3 @@ button[onclick*="submitPressure"]:hover {
     display: none !important;
   }
 }
-
-.token-badge { display: inline-flex; align-items: center; background: #fff3e0; color: #e65100; padding: 6px 12px; border-radius: 20px; font-weight: bold; margin-right: 16px; font-size: 1rem; border: 1px solid #ffe0b2; }
-.toast-message { position: fixed; bottom: 30px; right: 30px; background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 1rem; z-index: 10000; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; }
-.toast-message.show { opacity: 1; transform: translateY(0); }
