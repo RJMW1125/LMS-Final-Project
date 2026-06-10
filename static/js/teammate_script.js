@@ -195,8 +195,8 @@ function loginTopbar() {
 
 function loginWithDemoAccount() {
   const role = document.querySelector("input[name='role']:checked").value;
-  const username = document.getElementById("loginUser").value.trim();
-  const password = document.getElementById("loginPass").value.trim();
+  const username = document.getElementById("loginUser").value.trim().toUpperCase();
+  const password = document.getElementById("loginPass").value.trim().toUpperCase();
   const account = findAccount(role, username);
 
   const error = document.getElementById("loginError");
