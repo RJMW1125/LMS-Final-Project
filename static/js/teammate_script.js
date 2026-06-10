@@ -149,13 +149,22 @@ function saveRegisteredAccounts(accounts) {
 function initializeDemoClass() {
   const registered = getRegisteredAccounts();
   let added = false;
-  for (let i = 1; i <= 30; i++) {
-    const uname = `student${i}`;
+  const demoStudents = [
+    "S11255017", "S11255021", "S11255022", "S11255043", "S11255018", 
+    "S11255040", "S10955049", "S11255020", "S11255024", "S11255044", 
+    "S11255052", "S11255063", "S11255053", "S11255014", "S11255006", 
+    "S11255011", "S11255023", "S11222055", "S11255056", "S11255019", 
+    "S11255033", "S11255061", "S11255060", "S11055028", "S11155006", 
+    "S11255001", "S11255015", "S11255042"
+  ];
+  
+  demoStudents.forEach(uname => {
     if (!registered[uname]) {
-      registered[uname] = { role: "student", username: uname, password: "123", nickname: `同學 ${i}` };
+      registered[uname] = { role: "student", username: uname, password: uname, nickname: uname };
       added = true;
     }
-  }
+  });
+
   if (added) {
     saveRegisteredAccounts(registered);
   }
