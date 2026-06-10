@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodStudy x MemeLogic</title>
+  <!-- ÂºïÂÖ•ÁµÑÂì°??CSS -->
+  <link rel="stylesheet" href="./static/css/teammate_style.css" />
+  <!-- ÂºïÂÖ•?ëÂÄëÂ??¨Á? CSS (?ØËÉΩ?ÉÊ?‰∏Ä‰∫õË?Á™ÅÔ?ÂæåÁ??ÉË??? -->
+  <link rel="stylesheet" href="./static/css/style.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+</head>
+<body>
+  <!-- ?ôÊòØÁµÑÂì°??UI ÂÆπÂô® -->
+  <div id="app"></div>
+
+  <!-- ‰ª•‰??ØÊ??ë‰??ôÁ? Modal ?áÂ?Â∑•ÂÖ∑ -->
+  <button id="chat-widget-btn" class="btn-squish" title="?ºÂè´ÂøÉÈ??í‰?" style="z-index: 9999;">?å± ?ºÂè´?í‰?</button>
+
+  <div id="chat-widget-window" class="hidden-widget" style="z-index: 9999;">
+      <div id="chat-widget-header">
+          <h3>?å± ÂøÉÈ??í‰??ôÁ∑¥</h3>
+          <button id="chat-widget-close">&times;</button>
+      </div>
+      <div id="chat-container">
+      </div>
+      <div id="chat-widget-input-area">
+          <input type="text" id="user-input" placeholder="Ë™™Ë™™‰Ω†Áèæ?®Á?Â≠∏Á??¶ÊÖÆ...">
+          <button id="send-btn">?ÅÂá∫</button>
+      </div>
+  </div>
+
+  <!-- ?•Ë?Ëº∏ÂÖ• Modal -->
+  <div id="journal-modal" class="modal-overlay" style="z-index: 9999;">
+      <div class="modal-content" style="max-width: 450px;">
+          <h2 style="margin-bottom: 10px;">?çÔ? ?∞ÂØ´‰ªäÊó•?•Ë?</h2>
+          <p style="margin-bottom: 15px; color: #666;">Á∏ΩÁ?‰∏Ä‰∏ã‰?Â§©Á?Â≠∏Á??Ä?ãÔ??ôÊÆµË©±Â??ÉË¢´?∞Âú®?®Á?Â∞àÂ±¨?é‰ø°?á‰?Ôº?/p>
+          
+          <textarea id="journal-input" placeholder="‰ªäÂ§©?ñÁÑ∂ÂæàÁ¥ØÔºå‰??ëÈ??ØÊ??é‰?‰∫ÜÔ?..." style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 1em; resize: none; box-sizing: border-box;"></textarea>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+              <button id="btn-confirm-journal" class="btn-squish" style="flex: 1; background-color: var(--color-stable); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;">Á¢∫Â??üÊ?</button>
+              <button id="btn-cancel-journal" class="btn-squish" style="flex: 1; background-color: #eee; color: #333; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;">?ñÊ?</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- ?ñÈ??æÂ§ßÊ™¢Ë? Modal -->
+  <div id="gallery-lightbox" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+      <div style="position: relative;">
+          <button id="btn-close-lightbox" style="position: absolute; top: -15px; right: -15px; background: #d9534f; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; z-index: 2010; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">X</button>
+          <div id="lightbox-content">
+              <!-- ?ôË£°Â∞áÂ??ãÊ??•ÊîæÂ§ßÁ??é‰ø°??HTML ?ñÂ???-->
+          </div>
+      </div>
+  </div>
+
+  <!-- ÂºïÂÖ•?Ä?âÁ? JS -->
+  <!-- 1. ÁµÑÂì°??UI Ê∏≤Ê??∏Â? -->
+  <script src="./static/js/teammate_script.js?v=2"></script>
+  <script src="./static/js/popcat.js?v=2"></script>
+  <script src="./static/js/gacha.js?v=2"></script>
+  <script src="./static/js/postcard.js?v=2"></script>
+  <script src="./static/js/chat.js?v=2"></script>
+</body>
+</html>
