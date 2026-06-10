@@ -12,7 +12,7 @@ window.initGachaEvents = function() {
     if (tokenDisplay) tokenDisplay.innerText = tokens;
 
     // 每日抽卡次數限制邏輯 (測試中，暫時改為 999)
-    const MAX_DAILY_DRAWS = 999;
+    const MAX_DAILY_DRAWS = 3;
     const todayStr = window.getLocalDateString();
     let lastDrawDate = localStorage.getItem(`lms_last_draw_date_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`) || '';
     let dailyDraws = parseInt(localStorage.getItem(`lms_daily_draws_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || 0;
