@@ -4,6 +4,30 @@ const app = document.getElementById("app");
 window.getLocalDateString = function (d = new Date()) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 const todayKey = window.getLocalDateString();
 
+// ====== Botpress 動態加載邏輯 ======
+function loadBotpress() {
+  if (document.getElementById('bp-inject-script')) {
+    if (window.botpress) window.botpress.sendEvent({ type: "show" });
+    const widget = document.getElementById('bp-web-widget-container');
+    if (widget) widget.style.display = 'block';
+    return;
+  }
+  const injectScript = document.createElement('script');
+  injectScript.id = 'bp-inject-script';
+  injectScript.src = 'https://cdn.botpress.cloud/webchat/v3.6/inject.js';
+  const configScript = document.createElement('script');
+  configScript.src = 'https://files.bpcontent.cloud/2026/06/10/15/20260610150935-LRH30M5J.js';
+  configScript.defer = true;
+  document.body.appendChild(injectScript);
+  document.body.appendChild(configScript);
+}
+
+function hideBotpress() {
+  if (window.botpress) window.botpress.sendEvent({ type: "hide" });
+  const widget = document.getElementById('bp-web-widget-container');
+  if (widget) widget.style.display = 'none';
+}
+
 /* ===== Gemini AI 設定 =====
 請在 static/js/config.js 中設定：
 window.GEMINI_API_KEY = "你的 Gemini API Key";
@@ -743,6 +767,7 @@ function topbar(simple = false) {
 }
 
 function renderLogin() {
+  hideBotpress();
   const chatBtn = document.getElementById("chat-widget-btn");
   const chatWindow = document.getElementById("chat-widget-window");
   if (chatBtn) chatBtn.style.display = "none";
@@ -935,6 +960,7 @@ function renderMobileMenu(page) {
 }
 
 function appLayout(page, title, content) {
+  loadBotpress();
   const chatBtn = document.getElementById("chat-widget-btn");
   if (chatBtn) chatBtn.style.display = "flex";
 
