@@ -30,15 +30,15 @@ function showToast(message) {
 
 function updateTokens(amount) {
   const today = window.getLocalDateString();
-  let savedDate = localStorage.getItem('lms_daily_earned_date');
-  let dailyEarned = parseInt(localStorage.getItem('lms_daily_earned_tokens')) || 0;
+  let savedDate = localStorage.getItem(`lms_daily_earned_date_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`);
+  let dailyEarned = parseInt(localStorage.getItem(`lms_daily_earned_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || 0;
 
   if (savedDate !== today) {
     dailyEarned = 0;
-    localStorage.setItem('lms_daily_earned_date', today);
+    localStorage.setItem(`lms_daily_earned_date_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, today);
   }
 
-  let tokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
+  let tokens = parseInt(localStorage.getItem(`lms_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || 15;
 
   if (amount > 0) {
     const spaceLeft = MAX_DAILY_TOKENS - dailyEarned;
@@ -50,7 +50,7 @@ function updateTokens(amount) {
     const actualEarned = Math.min(amount, spaceLeft);
     tokens += actualEarned;
     dailyEarned += actualEarned;
-    localStorage.setItem('lms_daily_earned_tokens', dailyEarned);
+    localStorage.setItem(`lms_daily_earned_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, dailyEarned);
     showToast("🎉 恭喜完成任務！獲得 " + actualEarned + " 枚代幣！");
     if (typeof window.confetti === 'function') window.confetti();
   } else if (amount < 0) {
@@ -62,12 +62,12 @@ function updateTokens(amount) {
     if (dailyEarned > 0) {
       dailyEarned += amount;
       if (dailyEarned < 0) dailyEarned = 0;
-      localStorage.setItem('lms_daily_earned_tokens', dailyEarned);
+      localStorage.setItem(`lms_daily_earned_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, dailyEarned);
     }
     showToast("⚠️ 任務狀態變更，已扣回 " + Math.abs(amount) + " 枚代幣");
   }
 
-  localStorage.setItem('lms_tokens', tokens);
+  localStorage.setItem(`lms_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, tokens);
 
   // Update token display in topbar
   const tokenDisplay = document.getElementById("topbar-token-count");
@@ -687,7 +687,7 @@ function getPressureAdvice() {
 }
 
 function topbar(simple = false) {
-  const currentTokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
+  const currentTokens = parseInt(localStorage.getItem(`lms_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || 15;
   return `
     <header class="topbar">
       <div class="logo" onclick="renderLogin()">

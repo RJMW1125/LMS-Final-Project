@@ -71,15 +71,15 @@ window.initPostcardEvents = function() {
             previewArea.style.display = 'flex';
 
             // 抓取真實數據
-            const totalTasks = (JSON.parse(localStorage.getItem('lms_todos')) || []).filter(t => t.completed).length;
+            const totalTasks = (JSON.parse(localStorage.getItem(`lms_todos_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || []).filter(t => t.completed).length;
             
             // 從心情紀錄計算天數
-            const records = JSON.parse(localStorage.getItem('lms_user_records')) || [];
+            const records = JSON.parse(localStorage.getItem(`lms_user_records_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || [];
             const focusDays = records.filter(r => r.mood === 'focus').length;
             const anxiousDays = records.filter(r => r.mood === 'anxious').length;
 
             // 取得最新迷因
-            let memeGallery = JSON.parse(localStorage.getItem('lms_meme_gallery')) || [];
+            let memeGallery = JSON.parse(localStorage.getItem(`lms_meme_gallery_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || [];
             let pikmin1 = 'https://i.imgflip.com/2cp3na.jpg'; // 預設圖
             if (memeGallery.length >= 1) {
                 pikmin1 = memeGallery[memeGallery.length - 1].url;
@@ -127,9 +127,9 @@ window.initPostcardEvents = function() {
     if (btnSave) {
         btnSave.onclick = function() {
             if (!currentPostcardData) return;
-            let gallery = JSON.parse(localStorage.getItem('lms_postcard_gallery_data')) || [];
+            let gallery = JSON.parse(localStorage.getItem(`lms_postcard_gallery_data_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || [];
             gallery.push(currentPostcardData);
-            localStorage.setItem('lms_postcard_gallery_data', JSON.stringify(gallery));
+            localStorage.setItem(`lms_postcard_gallery_data_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, JSON.stringify(gallery));
             
             alert('⭐ 成功收藏至您的旅行圖鑑！');
             loadGallery();
@@ -164,10 +164,10 @@ window.initPostcardEvents = function() {
     function loadGallery() {
         if (!galleryContainer) return;
         
-        let galleryData = JSON.parse(localStorage.getItem('lms_postcard_gallery_data')) || [];
+        let galleryData = JSON.parse(localStorage.getItem(`lms_postcard_gallery_data_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || [];
         
         // 為了相容以前存的 Base64 舊資料，合併顯示
-        let oldGallery = JSON.parse(localStorage.getItem('lms_postcard_gallery')) || [];
+        let oldGallery = JSON.parse(localStorage.getItem(`lms_postcard_gallery_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || [];
 
         galleryContainer.innerHTML = '';
 

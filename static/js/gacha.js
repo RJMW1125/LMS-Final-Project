@@ -8,19 +8,19 @@ window.initGachaEvents = function() {
     const moodInput = document.getElementById('gacha-mood-input');
     const dailyDrawDisplay = document.getElementById('daily-draw-count');
 
-    let tokens = parseInt(localStorage.getItem('lms_tokens')) || 15;
+    let tokens = parseInt(localStorage.getItem(`lms_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || 15;
     if (tokenDisplay) tokenDisplay.innerText = tokens;
 
     // 每日抽卡次數限制邏輯 (測試中，暫時改為 999)
     const MAX_DAILY_DRAWS = 999;
     const todayStr = window.getLocalDateString();
-    let lastDrawDate = localStorage.getItem('lms_last_draw_date') || '';
-    let dailyDraws = parseInt(localStorage.getItem('lms_daily_draws')) || 0;
+    let lastDrawDate = localStorage.getItem(`lms_last_draw_date_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`) || '';
+    let dailyDraws = parseInt(localStorage.getItem(`lms_daily_draws_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || 0;
 
     if (lastDrawDate !== todayStr) {
         dailyDraws = 0;
-        localStorage.setItem('lms_last_draw_date', todayStr);
-        localStorage.setItem('lms_daily_draws', dailyDraws);
+        localStorage.setItem(`lms_last_draw_date_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, todayStr);
+        localStorage.setItem(`lms_daily_draws_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, dailyDraws);
     }
     if (dailyDrawDisplay) dailyDrawDisplay.innerText = dailyDraws;
 
@@ -69,8 +69,8 @@ window.initGachaEvents = function() {
 
         tokens -= 1;
         dailyDraws += 1;
-        localStorage.setItem('lms_tokens', tokens);
-        localStorage.setItem('lms_daily_draws', dailyDraws);
+        localStorage.setItem(`lms_tokens_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, tokens);
+        localStorage.setItem(`lms_daily_draws_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, dailyDraws);
         
         tokenDisplay.innerText = tokens;
         if (dailyDrawDisplay) dailyDrawDisplay.innerText = dailyDraws;
@@ -207,7 +207,7 @@ window.initGachaEvents = function() {
             `;
 
             // 記錄到 Gallery
-            let gallery = JSON.parse(localStorage.getItem('lms_meme_gallery')) || [];
+            let gallery = JSON.parse(localStorage.getItem(`lms_meme_gallery_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`)) || [];
             gallery.push({
                 id: 'meme_' + Date.now(),
                 url: chosenData.finalImgUrl,
@@ -215,7 +215,7 @@ window.initGachaEvents = function() {
                 title: chosenData.userText,
                 date: window.getLocalDateString()
             });
-            localStorage.setItem('lms_meme_gallery', JSON.stringify(gallery));
+            localStorage.setItem(`lms_meme_gallery_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, JSON.stringify(gallery));
 
             // Anime.js 3D 翻牌動畫
             if (typeof anime !== 'undefined') {
