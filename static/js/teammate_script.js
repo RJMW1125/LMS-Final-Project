@@ -8,7 +8,7 @@ const todayKey = window.getLocalDateString();
 請把 YOUR_GEMINI_API_KEY_HERE 換成你的 Gemini API Key。
 Gemini API Key 通常會長得像：AIzaSy...
 */
-const GEMINI_API_KEY = "AQ.Ab8RN6LnphR9ki-Es7XHO33Q8SQszr7cAhLuwtNJDvmQupWhoA";
+const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
 const GEMINI_MODEL = "gemini-1.5-flash";
 
 const TOKEN_REWARD_MAIN = 3;
