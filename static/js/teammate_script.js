@@ -344,8 +344,20 @@ function createAccount() {
 
 function logout() {
   localStorage.removeItem("moodstudy_login");
+  
+  // 清除 Botpress 的暫存，確保換帳號時對話是全新的
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.startsWith("bp-") || key.includes("botpress"))) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+
   resetToGuestState();
-  renderLogin();
+  // 強制重新載入頁面，確保 Botpress 的 iframe 徹底銷毀
+  window.location.reload();
 }
 
 
