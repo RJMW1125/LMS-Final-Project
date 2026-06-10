@@ -946,8 +946,8 @@ function appLayout(page, title, content) {
           <button class="${page === "mood" ? "active" : ""}" onclick="renderMoodFeedback()">學習狀態回饋</button>
           <button class="${page === "ai" ? "active" : ""}" onclick="renderAI()">AI 學習分析</button>
           <button class="${page === "calendar" ? "active" : ""}" onclick="renderCalendar()">連續學習</button>
-          <button class="${page === "gacha" ? "active" : ""}" onclick="renderMemeModule()" style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px; color: #d9534f; font-weight: bold;">🎁 迷因獎勵</button>
-          <button class="${page === "popcat" ? "active" : ""}" onclick="renderPopcatModule()" style="color: #fb8532; font-weight: bold;">🐱 壓力釋放</button>
+          <button class="${page === "gacha" ? "active" : ""}" onclick="renderMemeModule()" style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px;">迷因獎勵</button>
+          <button class="${page === "popcat" ? "active" : ""}" onclick="renderPopcatModule()">壓力釋放</button>
         </nav>
         <div class="side-bottom">
           <button onclick="logout()">登出</button>
