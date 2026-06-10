@@ -5,11 +5,14 @@ window.getLocalDateString = function (d = new Date()) { return d.getFullYear() +
 const todayKey = window.getLocalDateString();
 
 /* ===== Gemini AI 設定 =====
-請把 YOUR_GEMINI_API_KEY_HERE 換成你的 Gemini API Key。
-Gemini API Key 通常會長得像：AIzaSy...
+請在 static/js/config.js 中設定：
+window.GEMINI_API_KEY = "你的 Gemini API Key";
+window.GEMINI_MODEL = "gemini-2.0-flash";
+
+注意：正式上線不建議把 API Key 放在前端，期末展示可暫時使用。
 */
-const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_API_KEY = window.GEMINI_API_KEY || "";
+const GEMINI_MODEL = window.GEMINI_MODEL || "gemini-2.0-flash";
 
 const TOKEN_REWARD_MAIN = 3;
 const TOKEN_REWARD_SUB = 1;
@@ -406,9 +409,18 @@ function normalizeSubtaskList(list) {
 }
 
 function getLocalTaskBreakdown(taskText) {
-  const text = String(taskText || "");
+  const text = String(taskText || "").trim();
 
-  if (text.includes("報告") || text.includes("簡報") || text.includes("專題") || text.includes("presentation")) {
+  // 生活整理類：避免「整理房間」被誤判成整理筆記
+  if (
+    text.includes("整理房間") || text.includes("打掃") || text.includes("房間") ||
+    text.includes("掃地") || text.includes("拖地") || text.includes("收拾") ||
+    text.includes("衣服") || text.includes("洗衣") || text.includes("垃圾")
+  ) {
+    return ["先丟掉垃圾", "衣服分類收好", "整理桌面雜物", "擦拭桌面灰塵", "掃地或拖地"];
+  }
+
+  if (text.includes("報告") || text.includes("簡報") || text.includes("專題") || text.toLowerCase().includes("presentation")) {
     return ["確認報告要求", "蒐集相關資料", "整理內容架構", "撰寫或製作內容", "檢查格式與錯字", "練習口頭說明"];
   }
 
@@ -424,11 +436,23 @@ function getLocalTaskBreakdown(taskText) {
     return ["先快速瀏覽內容", "標記不懂的地方", "整理單字與重點", "寫下段落摘要", "完成最後複習"];
   }
 
-  if (text.includes("筆記") || text.includes("整理")) {
+  // 只有明確和課業筆記有關時，才拆成筆記整理
+  if (
+    text.includes("整理筆記") || text.includes("筆記重點") ||
+    text.includes("課程筆記") || text.includes("上課筆記")
+  ) {
     return ["翻閱今日課程內容", "圈出重要觀念", "整理成條列重點", "補上不懂的地方", "最後快速看一遍"];
   }
 
-  return ["確認任務目標", "拆成可執行步驟", "先完成最簡單的一步", "完成主要內容", "檢查並收尾"];
+  if (text.includes("買") || text.includes("採買") || text.includes("購物")) {
+    return ["列出需要物品", "確認預算與數量", "安排購買路線", "購買主要物品", "回家整理收納"];
+  }
+
+  if (text.includes("回覆") || text.includes("寄信") || text.includes("email") || text.includes("訊息")) {
+    return ["確認回覆對象", "整理要說的重點", "撰寫回覆內容", "檢查語氣與錯字", "送出並紀錄"];
+  }
+
+  return ["確認任務目標", "列出需要物品", "先做最簡單一步", "完成主要內容", "檢查並收尾"];
 }
 
 function parseTaskBreakdownResponse(rawText) {
@@ -460,17 +484,26 @@ async function getAITaskBreakdown(taskText) {
   }
 
   const prompt = `
-你是 MoodStudy 的任務拆解助手。
-請把使用者的大任務（可能是課業學習、小型專案開發、或習慣自律培養）拆成 4 到 6 個具體、短小、容易打勾的小任務。
+你是 MoodStudy 的 AI 任務拆解助理。
 
-大任務：「${taskText}」
+請根據使用者輸入的「原始任務」本身進行拆解。
+不要自行把任務改成讀書、課程或考試內容，除非原始任務本身就是學習、作業、報告或考試。
+
+任務可能包含：
+- 學習任務，例如準備考試、寫報告、整理筆記
+- 生活任務，例如整理房間、洗衣服、打掃、買東西
+- 行政任務，例如整理資料、回覆訊息、寄信
+- 專案任務，例如製作簡報、寫程式、完成系統功能
+
+原始任務：「${taskText}」
 
 規則：
 1. 使用繁體中文。
-2. 每個小任務最多 12 個中文字左右。
-3. 小任務要具體可執行，不要太抽象。
-4. 不要加入鼓勵語、解釋、標題。
-5. 只回傳 JSON 陣列，例如：["確認題目要求","蒐集資料","整理重點"]
+2. 拆成 4 到 6 個具體、短小、容易打勾的小任務。
+3. 每個小任務最多 12 個中文字左右。
+4. 小任務必須符合原始任務，不要答非所問。
+5. 不要加入鼓勵語、解釋、標題。
+6. 只回傳 JSON 陣列，例如：["先丟掉垃圾","衣服分類收好","整理桌面雜物"]
 `;
 
   try {
