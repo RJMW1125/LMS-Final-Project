@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MoodStudy x MemeLogic</title>
-  <!-- 撘蝯??CSS -->
+  <!-- 引入組員的 CSS -->
   <link rel="stylesheet" href="./static/css/teammate_style.css" />
-  <!-- 撘???祉? CSS (?航??銝鈭?蝒?敺????? -->
+  <!-- 引入我們原本的 CSS (可能會有一些衝突，後續會處理) -->
   <link rel="stylesheet" href="./static/css/style.css">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -14,52 +14,52 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>
 <body>
-  <!-- ?蝯??UI 摰孵 -->
+  <!-- 這是組員的 UI 容器 -->
   <div id="app"></div>
 
-  <!-- 隞乩??舀????? Modal ??撌亙 -->
-  <button id="chat-widget-btn" class="btn-squish" title="?澆敹???" style="z-index: 9999;">? ?澆??</button>
+  <!-- 以下是我們保留的 Modal 與小工具 -->
+  <button id="chat-widget-btn" class="btn-squish" title="呼叫心靈園丁" style="z-index: 9999;">🌱 呼叫園丁</button>
 
   <div id="chat-widget-window" class="hidden-widget" style="z-index: 9999;">
       <div id="chat-widget-header">
-          <h3>? 敹????毀</h3>
+          <h3>🌱 心靈園丁教練</h3>
           <button id="chat-widget-close">&times;</button>
       </div>
       <div id="chat-container">
       </div>
       <div id="chat-widget-input-area">
-          <input type="text" id="user-input" placeholder="隤芾牧雿?函?摮貊??行...">
-          <button id="send-btn">?</button>
+          <input type="text" id="user-input" placeholder="說說你現在的學習焦慮...">
+          <button id="send-btn">送出</button>
       </div>
   </div>
 
-  <!-- ?亥?頛詨 Modal -->
+  <!-- 日誌輸入 Modal -->
   <div id="journal-modal" class="modal-overlay" style="z-index: 9999;">
       <div class="modal-content" style="max-width: 450px;">
-          <h2 style="margin-bottom: 10px;">?? ?啣神隞?亥?</h2>
-          <p style="margin-bottom: 15px; color: #666;">蝮賜?銝銝?憭拍?摮貊?????挾閰勗??◤?啣?函?撠惇?縑??嚗?/p>
+          <h2 style="margin-bottom: 10px;">✍️ 撰寫今日日誌</h2>
+          <p style="margin-bottom: 15px; color: #666;">總結一下今天的學習狀態，這段話將會被印在您的專屬明信片上！</p>
           
-          <textarea id="journal-input" placeholder="隞予?敺敞嚗????舀???鈭?..." style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 1em; resize: none; box-sizing: border-box;"></textarea>
+          <textarea id="journal-input" placeholder="今天雖然很累，但我還是撐過來了！..." style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 1em; resize: none; box-sizing: border-box;"></textarea>
 
           <div style="display: flex; gap: 10px; margin-top: 20px;">
-              <button id="btn-confirm-journal" class="btn-squish" style="flex: 1; background-color: var(--color-stable); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;">蝣箏???</button>
-              <button id="btn-cancel-journal" class="btn-squish" style="flex: 1; background-color: #eee; color: #333; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;">??</button>
+              <button id="btn-confirm-journal" class="btn-squish" style="flex: 1; background-color: var(--color-stable); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;">確定生成</button>
+              <button id="btn-cancel-journal" class="btn-squish" style="flex: 1; background-color: #eee; color: #333; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;">取消</button>
           </div>
       </div>
   </div>
 
-  <!-- ???曉之瑼Ｚ? Modal -->
+  <!-- 圖鑑放大檢視 Modal -->
   <div id="gallery-lightbox" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
       <div style="position: relative;">
           <button id="btn-close-lightbox" style="position: absolute; top: -15px; right: -15px; background: #d9534f; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; z-index: 2010; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">X</button>
           <div id="lightbox-content">
-              <!-- ?ㄐ撠????交憭抒??縑??HTML ????-->
+              <!-- 這裡將動態插入放大的明信片 HTML 或圖片 -->
           </div>
       </div>
   </div>
 
-  <!-- 撘??? JS -->
-  <!-- 1. 蝯??UI 皜脫??詨? -->
+  <!-- 引入所有的 JS -->
+  <!-- 1. 組員的 UI 渲染核心 -->
   <script src="./static/js/teammate_script.js?v=2"></script>
   <script src="./static/js/popcat.js?v=2"></script>
   <script src="./static/js/gacha.js?v=2"></script>
