@@ -280,7 +280,7 @@ function renderRegister() {
         </section>
       </main>
       <footer class="footer">
-        <span>© 2024 MoodStudy. All rights reserved.</span>
+        <span>© 2026 MoodStudy. All rights reserved.</span>
       </footer>
     </div>
   `;
@@ -821,7 +821,7 @@ function renderLogin() {
         </section>
       </main>
       <footer class="footer">
-        <span>© 2024 MoodStudy. All rights reserved.</span>
+        <span>© 2026 MoodStudy. All rights reserved.</span>
         <span>隱私權政策　使用條款　聯絡我們</span>
       </footer>
     </div>
