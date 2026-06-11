@@ -15,11 +15,13 @@ function loadBotpress() {
   const injectScript = document.createElement('script');
   injectScript.id = 'bp-inject-script';
   injectScript.src = 'https://cdn.botpress.cloud/webchat/v3.6/inject.js';
-  const configScript = document.createElement('script');
-  configScript.src = 'https://files.bpcontent.cloud/2026/06/10/15/20260610150935-LRH30M5J.js';
-  configScript.defer = true;
+  injectScript.onload = () => {
+    const configScript = document.createElement('script');
+    configScript.src = 'https://files.bpcontent.cloud/2026/06/10/15/20260610150935-LRH30M5J.js';
+    configScript.defer = true;
+    document.body.appendChild(configScript);
+  };
   document.body.appendChild(injectScript);
-  document.body.appendChild(configScript);
 }
 
 function hideBotpress() {
