@@ -514,7 +514,7 @@ function parseTaskBreakdownResponse(rawText) {
   );
 }
 
-async function getAITaskBreakdown(taskText) {
+async function getAITaskBreakdown(taskText, term = "短期") {
   const fallback = getLocalTaskBreakdown(taskText);
 
   if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
@@ -522,26 +522,27 @@ async function getAITaskBreakdown(taskText) {
   }
 
   const prompt = `
-你是 MoodStudy 的 AI 任務拆解助理。
+你是 MoodStudy 的 AI 任務拆解助理（心靈園丁）。
 
-請根據使用者輸入的「原始任務」本身進行拆解。
+請根據使用者輸入的「原始任務」本身進行拆解，並根據目標期程「${term}目標」調整策略。
 不要自行把任務改成讀書、課程或考試內容，除非原始任務本身就是學習、作業、報告或考試。
 
-任務可能包含：
-- 學習任務，例如準備考試、寫報告、整理筆記
-- 生活任務，例如整理房間、洗衣服、打掃、買東西
-- 行政任務，例如整理資料、回覆訊息、寄信
-- 專案任務，例如製作簡報、寫程式、完成系統功能
+目標期程策略：
+- 短期目標：請拆解成立即可執行的細小動作（例如：打開書本、穿上運動鞋）。第一步必須是極低門檻、無痛的動作。
+- 中期目標：請以「階段性產出」來拆解（例如：收集資料、完成大綱、撰寫第一段）。
+- 長期目標：請以「習慣養成」與「里程碑」來拆解（例如：設定固定時間、尋找共同打卡夥伴、完成初步挑戰）。
 
 原始任務：「${taskText}」
+目標期程：「${term}目標」
 
 規則：
 1. 使用繁體中文。
-2. 拆成 4 到 6 個具體、短小、容易打勾的小任務。
-3. 每個小任務最多 12 個中文字左右。
+2. 拆成 4 到 6 個具體、短小、循序漸進的微型任務。
+3. 每個小任務最多 15 個中文字左右。
 4. 小任務必須符合原始任務，不要答非所問。
-5. 不要加入鼓勵語、解釋、標題。
-6. 只回傳 JSON 陣列，例如：["先丟掉垃圾","衣服分類收好","整理桌面雜物"]
+5. 不要加入鼓勵語、解釋、標題。不要加上「第一步」、「第二步」這種前綴。
+6. 第一個任務必須設計得「極度簡單」，讓使用者不會覺得太難而放棄，以培養自律。
+7. 只回傳 JSON 陣列，例如：["換上外出運動鞋","出門散步十分鐘","快走與慢跑交替"]，不要包含 markdown 標籤。
 `;
 
   try {
@@ -558,9 +559,9 @@ async function getAITaskBreakdown(taskText) {
             }
           ],
           generationConfig: {
-            temperature: 0.45,
+            temperature: 0.6,
             topP: 0.9,
-            maxOutputTokens: 220
+            maxOutputTokens: 250
           }
         })
       }
@@ -572,7 +573,9 @@ async function getAITaskBreakdown(taskText) {
     }
 
     const data = await response.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    // 清除可能含有的 markdown
+    raw = raw.replace(/```json/g, "").replace(/```/g, "").trim();
     const parsed = parseTaskBreakdownResponse(raw);
     return parsed.length ? parsed : fallback;
   } catch (error) {
@@ -2642,15 +2645,65 @@ function toggleTodo(index) {
 }
 
 function addTodo() {
-  const text = prompt("請輸入新的任務：");
-  if (text) {
-    const time = prompt("請輸入預估時間，例如：30 分鐘", "30 分鐘") || "30 分鐘";
-    state.todos.push({ text, time, done: false, subtasks: [] });
-    syncTodayCheckinTaskStatus();
-    save();
-    renderAI();
+  const modal = document.getElementById("add-todo-modal");
+  if (modal) {
+    document.getElementById("todo-input-text").value = "";
+    document.getElementById("todo-input-time").value = "30 分鐘";
+    document.getElementById("todo-input-term").value = "短期";
+    document.getElementById("todo-input-ai").checked = true;
+    modal.style.display = "flex";
   }
 }
+
+// 註冊 Modal 按鈕事件
+document.addEventListener("DOMContentLoaded", () => {
+  const btnConfirm = document.getElementById("btn-confirm-todo");
+  const btnCancel = document.getElementById("btn-cancel-todo");
+  
+  if (btnCancel) {
+    btnCancel.addEventListener("click", () => {
+      document.getElementById("add-todo-modal").style.display = "none";
+    });
+  }
+  
+  if (btnConfirm) {
+    btnConfirm.addEventListener("click", async () => {
+      const text = document.getElementById("todo-input-text").value.trim();
+      const time = document.getElementById("todo-input-time").value.trim() || "30 分鐘";
+      const term = document.getElementById("todo-input-term").value;
+      const useAI = document.getElementById("todo-input-ai").checked;
+      
+      if (!text) {
+        alert("請輸入任務名稱！");
+        return;
+      }
+      
+      const btn = document.getElementById("btn-confirm-todo");
+      btn.disabled = true;
+      btn.textContent = useAI ? "✨ AI 拆解中..." : "新增中...";
+      
+      try {
+        let subtasks = [];
+        if (useAI) {
+          const breakdown = await getAITaskBreakdown(text, term);
+          subtasks = breakdown.map(t => ({ text: t, done: false }));
+        }
+        
+        state.todos.push({ text, time, term, done: false, subtasks });
+        syncTodayCheckinTaskStatus();
+        save();
+        renderAI(); // 重新渲染畫面
+        document.getElementById("add-todo-modal").style.display = "none";
+      } catch (err) {
+        console.error(err);
+        alert("新增失敗，請稍後再試。");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "確定新增";
+      }
+    });
+  }
+});
 
 function deleteTodo(index) {
   const todo = state.todos[index];
@@ -2691,7 +2744,8 @@ async function aiBreakdownTask(index) {
   }
 
   try {
-    const subtasks = await getAITaskBreakdown(todo.text);
+    const termToUse = todo.term || "短期";
+    const subtasks = await getAITaskBreakdown(todo.text, termToUse);
     todo.subtasks = subtasks.map(text => ({ text, done: false }));
     syncTodoDoneFromSubtasks(todo);
     syncTodayCheckinTaskStatus();
