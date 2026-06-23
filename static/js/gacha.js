@@ -33,14 +33,19 @@ window.initGachaEvents = function() {
             try {
                 // 直接呼叫 Giphy API (因為 GitHub Pages 只能託管靜態檔案，無法跑 Python 後端)
                 const apiKey = "B1s9rIFtU6TCsKLMT6R4y9dsY6Yi0v29";
+                // 使用 search API 取代 random，因為 random 對中文標籤支援極差
                 const statusQuery = userMood ? encodeURIComponent(userMood) : 'funny meme';
-                const giphyUrl = `https://api.giphy.com/v1/gifs/random?api_key=${apiKey}&tag=${statusQuery}&rating=g`;
+                const limit = 20; // 抓前 20 筆相關圖片再來隨機挑選
+                const giphyUrl = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${statusQuery}&limit=${limit}&lang=zh-TW&rating=g`;
                 
                 const res = await fetch(giphyUrl);
                 if (!res.ok) throw new Error("Giphy API error or rate limit");
                 const data = await res.json();
-                if (!data.data || !data.data.images) throw new Error("GIPHY API returned no image");
-                finalImgUrl = data.data.images.original.url;
+                if (!data.data || data.data.length === 0) throw new Error("GIPHY API returned no image");
+                
+                // 從搜尋結果中隨機挑選一張
+                const randomIndex = Math.floor(Math.random() * data.data.length);
+                finalImgUrl = data.data[randomIndex].images.original.url;
             } catch (err) {
                 // 若後端掛掉、API 額度用盡，啟用本地備案圖庫
                 const fallbackMemes = [
