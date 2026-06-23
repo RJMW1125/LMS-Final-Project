@@ -1160,15 +1160,33 @@ function appLayout(page, title, content) {
 }
 
 function renderMemeModule() {
+  const doneTasks = state.todos.filter(t => t.done);
+  let taskOptions = "";
+  let btnStyle = "background-color: var(--color-stable); color: white;";
+  let btnDisabled = "";
+  
+  if (doneTasks.length === 0) {
+      taskOptions = `<option value="">⚠️ 請先去首頁完成一項學習任務，再來抽卡！</option>`;
+      btnStyle = "background-color: #ccc; color: #666; cursor: not-allowed;";
+      btnDisabled = "disabled";
+  } else {
+      doneTasks.forEach(t => {
+          taskOptions += `<option value="${t.text}">✅ 慶祝完成：${t.text}</option>`;
+      });
+  }
+
   const content = `
       <section id="module-gacha" class="page-section active" style="padding: 0;">
-          <h2 style="margin-bottom: 20px;">🎮 迷因修煉抽卡</h2>
+          <h2 style="margin-bottom: 20px;">🏆 學習成就抽卡牆</h2>
           <div class="gacha-dashboard" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center;">
               <p style="font-size: 1.2em; font-weight: bold;">目前代幣：<span id="token-count" style="color: var(--color-stable); font-size: 1.3em;">15</span> 🪙 &nbsp;&nbsp;|&nbsp;&nbsp; 今日抽卡：<span id="daily-draw-count">0</span> / 3 次</p>
               <div style="margin: 15px 0;">
-                  <input type="text" id="gacha-mood-input" placeholder="說說你現在的心情或關鍵字..." autocomplete="off" style="padding: 12px; width: 300px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;">
+                  <select id="gacha-mood-input" style="padding: 12px; width: 350px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;">
+                      ${taskOptions}
+                  </select>
+                  <p style="font-size: 0.9em; color: #888; margin-top: 10px;">為你完成的任務抽一張專屬迷因，並貼在你的學習牆上！</p>
               </div>
-              <button id="btn-start-draw-session" class="btn-squish" style="background-color: var(--color-stable); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: transform 0.2s;">消耗 1 幣開始發牌</button>
+              <button id="btn-start-draw-session" class="btn-squish" ${btnDisabled} style="${btnStyle} border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 1.1em; transition: transform 0.2s;">消耗 1 幣開始發牌</button>
           </div>
 
           <div id="cards-spread-area" style="display: none; justify-content: center; gap: 20px; margin-top: 30px; perspective: 1000px; flex-wrap: wrap; min-height: 380px; align-items: center;">

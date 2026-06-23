@@ -28,14 +28,14 @@ window.initGachaEvents = function() {
     async function generateCardsData(userMood) {
         const cards = [];
         for (let i = 0; i < 3; i++) {
-            let finalImgUrl = '';
+            // 將任務名稱加上 meme 作為搜尋關鍵字，提高找到相關迷因的機率
+            // 如果 userMood 是空的，預設用 funny meme
+            const statusQuery = userMood ? encodeURIComponent(userMood + " funny") : 'funny meme';
             
             try {
                 // 直接呼叫 Giphy API (因為 GitHub Pages 只能託管靜態檔案，無法跑 Python 後端)
                 const apiKey = "B1s9rIFtU6TCsKLMT6R4y9dsY6Yi0v29";
-                // 使用 search API 取代 random，因為 random 對中文標籤支援極差
-                const statusQuery = userMood ? encodeURIComponent(userMood) : 'funny meme';
-                const limit = 20; // 抓前 20 筆相關圖片再來隨機挑選
+                const limit = 20; 
                 const giphyUrl = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${statusQuery}&limit=${limit}&lang=zh-TW&rating=g`;
                 
                 const res = await fetch(giphyUrl);
@@ -43,7 +43,6 @@ window.initGachaEvents = function() {
                 const data = await res.json();
                 if (!data.data || data.data.length === 0) throw new Error("GIPHY API returned no image");
                 
-                // 從搜尋結果中隨機挑選一張
                 const randomIndex = Math.floor(Math.random() * data.data.length);
                 finalImgUrl = data.data[randomIndex].images.original.url;
             } catch (err) {
@@ -57,7 +56,7 @@ window.initGachaEvents = function() {
                 finalImgUrl = fallbackMemes[Math.floor(Math.random() * fallbackMemes.length)];
             }
             
-            cards.push({ finalImgUrl, userText: userMood || "這是一張神秘的迷因卡" });
+            cards.push({ finalImgUrl, userText: userMood || "這是你努力的證明" });
         }
         return cards;
     }
@@ -204,11 +203,12 @@ window.initGachaEvents = function() {
                             box-sizing: border-box;
                             box-shadow: 0 0 20px ${cardColor}88;
                         ">
-                            <span style="font-size: 1.1em; font-weight: bold; color: ${cardColor};">【專屬心情卡】</span>
+                            <span style="font-size: 1.1em; font-weight: bold; color: ${cardColor};">【任務成就解鎖】</span>
                             <div style="flex-grow: 1; width: 100%; display: flex; align-items: center; justify-content: center; margin: 15px 0;">
                                 <img src="${chosenData.finalImgUrl}" style="max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px;">
                             </div>
-                            <p style="color: #333; margin-top: 5px; font-size: 1em; text-align: center; font-weight: bold; line-height: 1.4;"><i>"${chosenData.userText}"</i></p>
+                            <p style="color: #666; margin-top: 5px; font-size: 0.85em; text-align: center; margin-bottom: 2px;">為了紀念你完成了：</p>
+                            <p style="color: #333; margin-top: 0; font-size: 1em; text-align: center; font-weight: bold; line-height: 1.4;"><i>「${chosenData.userText}」</i></p>
                         </div>
                     </div>
                 </div>
@@ -219,8 +219,8 @@ window.initGachaEvents = function() {
             gallery.push({
                 id: 'meme_' + Date.now(),
                 url: chosenData.finalImgUrl,
-                rarity: '心情卡',
-                title: chosenData.userText,
+                rarity: '任務成就',
+                title: '成就：' + chosenData.userText,
                 date: window.getLocalDateString()
             });
             localStorage.setItem(`lms_meme_gallery_${JSON.parse(localStorage.getItem('moodstudy_login')||'{}').username || ''}`, JSON.stringify(gallery));
