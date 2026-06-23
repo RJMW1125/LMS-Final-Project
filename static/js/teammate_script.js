@@ -7,14 +7,38 @@ const todayKey = window.getLocalDateString();
 // Botpress 載入邏輯已移至 static/js/botpress_loader.js
 
 /* ===== Gemini AI 設定 =====
-請在 static/js/config.js 中設定：
-window.GEMINI_API_KEY = "你的 Gemini API Key";
-window.GEMINI_MODEL = "gemini-2.0-flash";
-
-注意：正式上線不建議把 API Key 放在前端，期末展示可暫時使用。
-*/
-const GEMINI_API_KEY = window.GEMINI_API_KEY || "";
+// 組員更新：現在可以從 localStorage 讀取，並提供 UI 讓使用者自行輸入
+let GEMINI_API_KEY = window.GEMINI_API_KEY || localStorage.getItem("moodstudy_gemini_api_key") || "";
 const GEMINI_MODEL = window.GEMINI_MODEL || "gemini-2.0-flash";
+
+function askAndSaveGeminiKeyIfNeeded() {
+  if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY_HERE" && GEMINI_API_KEY !== "你的 Gemini API Key") return true;
+
+  const wantsInput = confirm(
+    "目前沒有設定 Gemini API Key，所以會使用內建備援拆解。\n\n" +
+    "若要使用真正 Gemini AI 即時拆解，請按「確定」輸入 API Key。\n" +
+    "這組 Key 只會安全地暫存在您的瀏覽器，不會外洩或寫進 GitHub。"
+  );
+
+  if (!wantsInput) return false;
+
+  const key = prompt("請貼上您的 Gemini API Key：");
+  if (key && key.trim()) {
+    GEMINI_API_KEY = key.trim();
+    localStorage.setItem("moodstudy_gemini_api_key", GEMINI_API_KEY);
+    alert("Gemini API Key 已暫存在此瀏覽器。接下來會嘗試使用 Gemini AI 拆解。");
+    return true;
+  }
+
+  alert("沒有輸入 API Key，系統會先使用內建備援拆解。");
+  return false;
+}
+
+function clearSavedGeminiKey() {
+  localStorage.removeItem("moodstudy_gemini_api_key");
+  GEMINI_API_KEY = window.GEMINI_API_KEY || "";
+  alert("已清除瀏覽器中的 Gemini API Key。");
+}
 
 const TOKEN_REWARD_MAIN = 3;
 const TOKEN_REWARD_SUB = 1;
@@ -444,7 +468,7 @@ function getBreakdownSourceClass(todo) {
 }
 
 function hasGeminiConfig() {
-  return Boolean(GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY_HERE");
+  return Boolean(GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY_HERE" && GEMINI_API_KEY !== "你的 Gemini API Key");
 }
 
 function getAIBreakdownModeText() {
@@ -2963,6 +2987,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let breakdownError = "";
 
         if (useAI) {
+          // 如果沒有 API Key，先詢問使用者是否要輸入
+          askAndSaveGeminiKeyIfNeeded();
+
           const result = await getAITaskBreakdown(text, term);
           subtasks = attachUrgencyToSubtasks(result.items || [], text);
           breakdownSource = result.source || "fallback";
@@ -3030,6 +3057,10 @@ async function aiBreakdownTask(index) {
 
   try {
     const termToUse = todo.term || "短期";
+    
+    // 如果沒有 API Key，先詢問使用者是否要輸入
+    askAndSaveGeminiKeyIfNeeded();
+
     const result = await getAITaskBreakdown(todo.text, termToUse);
     todo.subtasks = attachUrgencyToSubtasks(result.items || [], todo.text);
     todo.breakdownSource = result.source || "fallback";
